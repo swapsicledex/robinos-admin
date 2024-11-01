@@ -1,4 +1,4 @@
-import { createPresignedUrl } from "../url";
+import { createPresignedUrl } from "../../../utils/generateSignedUrl";
 
 export async function GET() {
     const signedUrl = await createPresignedUrl("my-image")
