@@ -17,7 +17,8 @@ function Home() {
     }
     const reader = new FileReader();
     reader.onloadend = () => {
-      setPreviewUrl(reader.result);
+      if(typeof reader.result === 'string') setPreviewUrl(reader.result);
+      else console.error('Unexpected file type:', typeof reader.result);
     }
     reader.readAsDataURL(file);
   }, [file]);
@@ -46,8 +47,8 @@ function Home() {
           }
         });
         console.log('File uploaded successfully:', response);
-      const imageUrl = await axios.get(`/api/saveimageurl?name=${fileNameWithExtension}`);
-      console.log(imageUrl.data.url)
+        const imageUrl = await axios.get(`/api/saveimageurl?name=${fileNameWithExtension}`);
+        console.log(imageUrl.data.url)
       } catch (error) {
         console.error('Error uploading file:', error);
       }
