@@ -3,11 +3,13 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image'
 import { Button } from '@/components/ui/button';
 import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 
 function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [preSignedUrl, setPreSignedUrl] = useState<string | null>(null)
+  const [fileNameWithExtension, setFileNameWithExtension] = useState<string | null>(null)
 
   useEffect(() => {
     if (!file) {
@@ -17,14 +19,17 @@ function Home() {
     reader.onloadend = () => {
       setPreviewUrl(reader.result);
     }
-
     reader.readAsDataURL(file);
   }, [file]);
 
-  const setFileHandler = async (file: File) => {
-    setFile(file)
+  const setFileHandler = async (newFile: File) => {
+    setFile(newFile)
+    const randomFileName = uuidv4()
+    const extension = newFile.name.split('.').pop()
+    const fullName = `${randomFileName}.${extension}`
+    setFileNameWithExtension(fullName)
     try {
-      const response = await axios.get("/api/getuploadurl");
+      const response = await axios.get(`/api/getuploadurl?name=${fullName}`);
       const url = response.data.url
       setPreSignedUrl(url)
     } catch (error) {
@@ -33,16 +38,16 @@ function Home() {
   }
 
   const handleUpload = async () => {
-    const formData = new FormData();
     if(file && preSignedUrl){
-      formData.append('file', file);
       try {
-        const response = await axios.put(preSignedUrl, formData, {
+        const response = await axios.put(preSignedUrl, file, {
           headers: {
-            "Content-Type": "multipart/form-data"
+            "Content-Type": file.type,
           }
         });
         console.log('File uploaded successfully:', response);
+      const imageUrl = await axios.get(`/api/saveimageurl?name=${fileNameWithExtension}`);
+      console.log(imageUrl.data.url)
       } catch (error) {
         console.error('Error uploading file:', error);
       }
