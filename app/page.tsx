@@ -39,7 +39,7 @@ function Home() {
       try {
         const response = await axios.put(preSignedUrl, formData, {
           headers: {
-            'Content-Type': 'multipart/form-data'
+            "Content-Type": "multipart/form-data"
           }
         });
         console.log('File uploaded successfully:', response);
