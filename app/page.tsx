@@ -34,8 +34,11 @@ function Home() {
           }
         });
         console.log('File uploaded successfully:', response);
-        const imageUrl = await axios.get(`/api/saveimageurl?name=${fileNameWithExtension}`);
-        console.log(imageUrl.data.url)
+        const imageUrl = await axios.post('/api/saveimageurl', {
+            name: "Alpha", // Take Name of the player/team from a input box
+            imageName: fileNameWithExtension
+          });
+        console.log(imageUrl.data)
       } catch (error) {
         console.error('Error uploading file:', error);
       }
