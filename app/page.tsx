@@ -33,7 +33,13 @@ function Home() {
           value="upload"
           className="p-6 bg-white rounded-lg shadow-md w-full flex flex-col gap-4"
         >
-          <UploadImageTab editMode={false} editId={-1} editName="" editUrl="" />
+          <UploadImageTab
+            editMode={false}
+            editId={-1}
+            editName=""
+            editUrl=""
+            uploadHandler={() => null}
+          />
         </TabsContent>
 
         <TabsContent
