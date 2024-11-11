@@ -2,15 +2,15 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export const createPresignedUrl = async (key: string) => {
-  const BUCKET_NAME = process.env.MINIO_BUCKET_NAME;
+  const BUCKET_NAME = process.env.NEXT_PUBLIC_CLOUDFLARE_R2_BUCKET_NAME;
   
-  const client = new S3Client({   
-    region: process.env.MINIO_REGION!,
+  const client = new S3Client({
+    region: process.env.NEXT_PUBLIC_CLOUDFLARE_R2_REGION!,
     credentials: {
-      accessKeyId: process.env.MINIO_KEY!,
-      secretAccessKey: process.env.MINIO_SECRET!,
+      accessKeyId: process.env.NEXT_PUBLIC_CLOUDFLARE_R2_KEY!,
+      secretAccessKey: process.env.NEXT_PUBLIC_CLOUDFLARE_R2_SECRET!,
     },
-    endpoint: process.env.MINIO_ENDPOINT!,
+    endpoint: process.env.NEXT_PUBLIC_CLOUDFLARE_R2_ENDPOINT!,
     forcePathStyle: true,
   });
 

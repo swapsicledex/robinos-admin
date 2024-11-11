@@ -6,7 +6,7 @@ export async function GET() {
     const userData = await db.select().from(players);
     return Response.json(userData);
   } catch (error) {
-    console.error("Error fetching users:", error);
-    Response.json({ error: "Failed to fetch users" });
+    console.error("Error fetching players:", error);
+    Response.json({ msg: "Failed to fetch players" });
   }
 }

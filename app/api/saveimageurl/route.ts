@@ -7,9 +7,9 @@ export async function POST(request: NextRequest) {
   const name = body.name;
   const player: NewPlayer = {
     name: name,
-    url: `${process.env.CUSTOM_URL}/${body.imageName}`,
+    url: `${process.env.NEXT_PUBLIC_CUSTOM_URL}/${body.imageName}`,
   };
-  console.log("image url: ", `${process.env.CUSTOM_URL}/${body.imageName}`);
+  console.log("image url: ", `${process.env.NEXT_PUBLIC_CUSTOM_URL}/${body.imageName}`);
   const newPlayer = await db.insert(players).values(player).returning();
   return Response.json(newPlayer[0]);
 }
