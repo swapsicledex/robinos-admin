@@ -4,7 +4,7 @@ import { players } from "@/db/schema";
 
 export async function DELETE() {
   try {
-    const userData = await db.delete(players).where(eq(players.id, id));
+    await db.delete(players).where(eq(players.id, id));
     console.log(`Player with id ${id} deleted successfully`);
     return Response.json({ msg: "Deleted successfully" });
   } catch (error) {

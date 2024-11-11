@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-import { deleteobject } from "@/utils/deleteObject";
+// import { deleteobject } from "@/utils/deleteObject";
 import LightPreview from "./ui/LightPreview";
 import DarkPreview from "./ui/DarkPreview";
 import UploadImageTab from "./UploadImageTab";
@@ -41,18 +41,18 @@ function ViewImagesTab() {
     setEditModal(null);
     getAllImagesData();
   };
-  const handleDelete = async (url: string, id: number) => {
-    setIsLoading(true);
-    try {
-      const deletedFromR2 = await deleteobject(url.split("/").at(-1) ?? "");
-      if (deletedFromR2) {
-        await axios.delete("/api/deleteimage");
-      }
-    } catch (error) {
-      console.error("Failed to delete: ", error);
-    }
-    setIsLoading(false);
-  };
+  // const handleDelete = async (url: string, id: number) => {
+  //   setIsLoading(true);
+  //   try {
+  //     const deletedFromR2 = await deleteobject(url.split("/").at(-1) ?? "");
+  //     if (deletedFromR2) {
+  //       await axios.delete("/api/deleteimage");
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to delete: ", error);
+  //   }
+  //   setIsLoading(false);
+  // };
 
   return (
     <div>

@@ -15,7 +15,7 @@ export default function UploadImageTab({
   uploadHandler,
 }: {
   editMode: boolean;
-  editId: Number;
+  editId: number;
   editName: string;
   editUrl: string;
   uploadHandler: () => void;
