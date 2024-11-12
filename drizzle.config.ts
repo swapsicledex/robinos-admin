@@ -12,6 +12,8 @@ export default defineConfig({
     user: process.env.DB_USER!,
     password: process.env.DB_PASSWORD!,
     database: process.env.DB_NAME!,
-    ssl: false
+    ssl: {
+      rejectUnauthorized: false, // Accepts any SSL certificate, required for SSL mode
+    },
   },
 });
