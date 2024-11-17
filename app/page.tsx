@@ -1,56 +1,52 @@
-"use client";
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import "react-toastify/dist/ReactToastify.css";
-import ViewImagesTab from "@/components/ViewImagesTab";
-import UploadImageTab from "@/components/UploadImageTab";
+// pages/index.tsx
+import Navbar from "@/components/ui/Navbar";
+import Link from "next/link";
 
-function Home() {
-  const [currentTab, setCurrentTab] = useState("upload");
+export default function Home() {
   return (
-    <main className="bg-gray-50 text-gray-900 min-h-screen p-10 flex flex-col items-center">
-      <Tabs
-        value={currentTab}
-        onValueChange={setCurrentTab}
-        className="w-full max-w-4xl"
-      >
-        <TabsList className="flex space-x-4 bg-white p-4 rounded-lg shadow mb-8">
-          <TabsTrigger
-            value="upload"
-            className="flex-1 text-center p-2 bg-gray-100 rounded-md"
-          >
-            Upload
-          </TabsTrigger>
-          <TabsTrigger
-            value="other"
-            className="flex-1 text-center p-2 bg-gray-100 rounded-md"
-          >
-            View
-          </TabsTrigger>
-        </TabsList>
+    <>
+      <Navbar />
 
-        <TabsContent
-          value="upload"
-          className="p-6 bg-white rounded-lg shadow-md w-full flex flex-col gap-4"
-        >
-          <UploadImageTab
-            editMode={false}
-            editId={-1}
-            editName=""
-            editUrl=""
-            uploadHandler={() => null}
-          />
-        </TabsContent>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-gray-800 p-6">
+        <h1 className="text-4xl font-bold mb-4">Robinos Admin Dashboard</h1>
+        <p className="text-lg mb-8">
+          Manage records for players, events, tokens, and categories.
+        </p>
 
-        <TabsContent
-          value="other"
-          className="p-6 bg-white rounded-lg shadow-md w-full pt-0"
-        >
-          <ViewImagesTab />
-        </TabsContent>
-      </Tabs>
-    </main>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
+          <Link
+            href="/players"
+            className="bg-white shadow-lg rounded-lg p-6 transition transform hover:scale-105 hover:bg-blue-100"
+          >
+            <h2 className="text-2xl font-semibold mb-2">Players &rarr;</h2>
+            <p>View and manage player records.</p>
+          </Link>
+
+          <Link
+            href="/events"
+            className="bg-white shadow-lg rounded-lg p-6 transition transform hover:scale-105 hover:bg-blue-100"
+          >
+            <h2 className="text-2xl font-semibold mb-2">Events &rarr;</h2>
+            <p>View and manage event records.</p>
+          </Link>
+
+          <Link
+            href="/tokens"
+            className="bg-white shadow-lg rounded-lg p-6 transition transform hover:scale-105 hover:bg-blue-100"
+          >
+            <h2 className="text-2xl font-semibold mb-2">Tokens &rarr;</h2>
+            <p>View and manage token records.</p>
+          </Link>
+
+          <Link
+            href="/category"
+            className="bg-white shadow-lg rounded-lg p-6 transition transform hover:scale-105 hover:bg-blue-100"
+          >
+            <h2 className="text-2xl font-semibold mb-2">Categories &rarr;</h2>
+            <p>View and manage category records.</p>
+          </Link>
+        </div>
+      </div>
+    </>
   );
 }
-
-export default Home;

@@ -2,8 +2,7 @@ import React, { useEffect } from "react";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 import LightPreview from "@/components/ui/LightPreview";
 import DarkPreview from "@/components/ui/DarkPreview";
 
@@ -28,12 +27,17 @@ export default function UploadImageTab({
     string | null
   >(null);
   const [isEdited, setIsEdited] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (editMode) {
-      setPreviewURL(editUrl);
-      setFileName(editName);
-      uploadFileFromUrl(editUrl, editName);
+      setIsLoading(true);
+      try {
+        setPreviewURL(editUrl);
+        setFileName(editName);
+        uploadFileFromUrl(editUrl, editName);
+      } catch {}
+      setIsLoading(false);
     }
   }, []);
 
@@ -67,6 +71,7 @@ export default function UploadImageTab({
 
   const handleUpload = async () => {
     if (file && preSignedUrl) {
+      setIsLoading(true);
       try {
         await axios.put(preSignedUrl, file, {
           headers: { "Content-Type": file.type },
@@ -94,6 +99,7 @@ export default function UploadImageTab({
         console.error("Error uploading file:", error);
         toast.error("Error uploading file.");
       }
+      setIsLoading(false);
     }
   };
 
@@ -117,11 +123,15 @@ export default function UploadImageTab({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 bg-white shadow-md rounded-lg p-6 max-w-lg mx-auto">
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="loader border-t-blue-600 border-4 rounded-full w-16 h-16 animate-spin"></div>
+        </div>
+      )}
       {!editMode ? (
         <h2 className="text-2xl font-semibold mb-4">Upload and Preview</h2>
       ) : null}
-      <ToastContainer position="bottom-left" autoClose={3000} theme="colored" />
       <input
         type="file"
         accept="image/*"

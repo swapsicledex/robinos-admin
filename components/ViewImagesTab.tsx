@@ -7,10 +7,12 @@ import LightPreview from "./ui/LightPreview";
 import DarkPreview from "./ui/DarkPreview";
 import UploadImageTab from "./UploadImageTab";
 
-type Player = {
+export type Player = {
   id: number;
   name: string;
   url: string;
+  created_at: Date;
+  updated_at: Date;
 };
 function ViewImagesTab() {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -55,7 +57,12 @@ function ViewImagesTab() {
   // };
 
   return (
-    <div>
+    <div className="bg-white shadow-md rounded-lg p-6 mx-auto">
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="loader border-t-blue-600 border-4 rounded-full w-16 h-16 animate-spin"></div>
+        </div>
+      )}
       <h2 className="text-2xl font-semibold mb-4">View and Edit</h2>
       <div className="p-6 bg-gray-50 rounded-lg shadow-md w-full">
         <ToastContainer
