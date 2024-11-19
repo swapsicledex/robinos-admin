@@ -5,13 +5,17 @@ import { NextRequest } from "next/server";
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const event: NewEvent = {
-    code: body.code as string,
+    code: body.code,
     saleEnd: body.saleEnd,
-    isDeployed: false,
-    teamA: body.teamAId,
-    teamB: body.teamBId,
-    tokenAddress: body.tokenAddressId,
-    category: body.categoryId,
+    isFeatured: body.isFeatured,
+    category: body.category,
+    teamA: body.teamA,
+    teamB: body.teamB,
+    tokenAddress: body.tokenAddress,
+    onChains: body.onChains,
+    isDeployed: body.isDeployed,
+    conditions: body.conditions,
+    handicap: body.handicap,
   };
   const newEvent = await db.insert(events).values(event).returning();
   return Response.json(newEvent[0]);

@@ -27,8 +27,6 @@ export default function TokenView() {
         <table className="w-full bg-white shadow-md rounded-lg border border-gray-200">
           <thead className="bg-gray-100 border-b">
             <tr>
-              <th className="p-4 text-left text-gray-700 font-medium">ID</th>
-              <th className="p-4 text-left text-gray-700 font-medium">Name</th>
               <th className="p-4 text-left text-gray-700 font-medium">
                 Symbol
               </th>
@@ -36,7 +34,7 @@ export default function TokenView() {
                 Address
               </th>
               <th className="p-4 text-left text-gray-700 font-medium">
-                Chain ID
+                Decimal
               </th>
             </tr>
           </thead>
@@ -44,11 +42,9 @@ export default function TokenView() {
             {allTokens.length > 0 ? (
               allTokens.map((token) => (
                 <tr key={token.id} className="border-b hover:bg-gray-50">
-                  <td className="p-4 text-gray-800">{token.id}</td>
-                  <td className="p-4 text-gray-800">{token.name}</td>
                   <td className="p-4 text-gray-800">{token.symbol}</td>
                   <td className="p-4 text-gray-800">{token.address}</td>
-                  <td className="p-4 text-gray-800">{token.chainId}</td>
+                  <td className="p-4 text-gray-800">{token.decimal}</td>
                 </tr>
               ))
             ) : (

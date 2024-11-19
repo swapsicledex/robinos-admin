@@ -22,9 +22,7 @@ function Players() {
           <TabPanel>
             <UploadImageTab
               editMode={false}
-              editId={-1}
-              editName=""
-              editUrl=""
+              editItem={null}
               uploadHandler={() => null}
             />
           </TabPanel>

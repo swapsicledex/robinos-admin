@@ -5,18 +5,16 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import LightPreview from "@/components/ui/LightPreview";
 import DarkPreview from "@/components/ui/DarkPreview";
+import Dropdown from "./ui/Dropdown";
+import { Category, Player } from "@/db/schema";
 
 export default function UploadImageTab({
   editMode,
-  editId,
-  editName,
-  editUrl,
+  editItem,
   uploadHandler,
 }: {
   editMode: boolean;
-  editId: number;
-  editName: string;
-  editUrl: string;
+  editItem: Player | null;
   uploadHandler: () => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
@@ -29,13 +27,27 @@ export default function UploadImageTab({
   const [isEdited, setIsEdited] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [allCategories, setAllCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [symbol, setSymbol] = useState("");
+
+  const getAllCategoriesData = async () => {
+    setIsLoading(true);
+    const response = await axios.get("/api/getallcategories");
+    setIsLoading(false);
+    setAllCategories(response.data);
+  };
+
   useEffect(() => {
-    if (editMode) {
+    getAllCategoriesData();
+    if (editMode&&editItem) {
       setIsLoading(true);
       try {
-        setPreviewURL(editUrl);
-        setFileName(editName);
-        uploadFileFromUrl(editUrl, editName);
+        setPreviewURL(editItem.url);
+        setFileName(editItem.name);
+        uploadFileFromUrl(editItem.url, editItem.name);
+        setSymbol(editItem.symbol);
+        setSelectedCategory(editItem.category);
       } catch {}
       setIsLoading(false);
     }
@@ -69,7 +81,8 @@ export default function UploadImageTab({
     }
   };
 
-  const handleUpload = async () => {
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (file && preSignedUrl) {
       setIsLoading(true);
       try {
@@ -78,16 +91,19 @@ export default function UploadImageTab({
         });
         if (editMode) {
           await axios.put("/api/updateimage", {
-            id: editId,
+            id: editItem?.id,
             name: fileName,
             imageName: fileNameWithExtension,
           });
           toast.success(`Details updated successfully!`);
           uploadHandler();
         } else {
+          console.log("selectedCategory: ", selectedCategory);
           await axios.post("/api/saveimageurl", {
             name: fileName,
             imageName: fileNameWithExtension,
+            symbol: symbol,
+            category: selectedCategory,
           });
           toast.success(`File uploaded successfully!`);
         }
@@ -95,6 +111,8 @@ export default function UploadImageTab({
         setPreviewURL(null);
         setFile(null);
         setFileName("");
+        setSelectedCategory(null);
+        setSymbol("");
       } catch (error) {
         console.error("Error uploading file:", error);
         toast.error("Error uploading file.");
@@ -129,48 +147,92 @@ export default function UploadImageTab({
           <div className="loader border-t-blue-600 border-4 rounded-full w-16 h-16 animate-spin"></div>
         </div>
       )}
-      {!editMode ? (
-        <h2 className="text-2xl font-semibold mb-4">Upload and Preview</h2>
-      ) : null}
-      <input
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        className="border border-gray-300 rounded-lg p-1 w-64"
-        required
-      />
-
-      <label className="text-gray-600">Team/Player Name</label>
-      <input
-        type="text"
-        placeholder="Enter team/player name"
-        value={fileName}
-        onChange={(e) => {
-          setIsEdited(true);
-          setFileName(e.target.value);
-        }}
-        className="border border-gray-300 rounded-lg p-2 w-48"
-        required
-      />
-
-      {previewURL && (
-        <div className="flex space-x-4 mt-6 justify-center">
-          <LightPreview previewURL={previewURL} />
-          <DarkPreview previewURL={previewURL} />
-        </div>
-      )}
-
-      <button
-        onClick={handleUpload}
-        disabled={(editMode && !isEdited) || !file || !fileName}
-        className={`mt-4 py-2 px-4 rounded-lg w-full ${
-          (editMode && !isEdited) || !file || !fileName
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-blue-600 text-white hover:bg-blue-500"
-        }`}
+      <form
+        onSubmit={handleUpload}
+        className="bg-white shadow-md rounded-lg p-6 max-w-md mx-auto"
       >
-        Upload
-      </button>
+        {!editMode ? (
+          <h2 className="text-2xl font-semibold mb-4">Upload and Preview</h2>
+        ) : null}
+
+        {/* Name Input */}
+        <label className="block mb-2 font-medium">
+          Player Name
+          <input
+            type="text"
+            value={fileName}
+            onChange={(e) => {
+              setIsEdited(true);
+              setFileName(e.target.value);
+            }}
+            className="border border-gray-300 rounded-lg p-2 w-full mt-1"
+            placeholder="Enter player name"
+            required
+          />
+        </label>
+
+        {/* Symbol Input */}
+        <label className="block mb-2 font-medium">
+          Symbol
+          <input
+            type="text"
+            value={symbol}
+            onChange={(e) => setSymbol(e.target.value)}
+            className="border border-gray-300 rounded-lg p-2 w-full mt-1"
+            placeholder="Enter player symbol"
+            required
+          />
+        </label>
+        {/* Category Dropdown */}
+        <label className="block mb-2 font-medium">
+          Category
+          <Dropdown
+            items={allCategories.map((category) => ({
+              id: category.id,
+              name: category.category,
+            }))}
+            placeholder="Choose a category"
+            onChange={(value: any) => {
+              setSelectedCategory(value.id);
+            }}
+          />
+        </label>
+        {/* File Upload */}
+        <label className="block mb-2 font-medium">
+          Upload File
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="border border-gray-300 rounded-lg p-1 w-64"
+            required
+          />
+          {file && (
+            <div className="mt-2 text-sm text-gray-600">
+              Selected File: {file.name}
+            </div>
+          )}
+          {previewURL && (
+            <div className="flex space-x-4 mt-6 justify-center">
+              <LightPreview previewURL={previewURL} />
+              <DarkPreview previewURL={previewURL} />
+            </div>
+          )}
+        </label>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={(editMode && !isEdited) || !file || !fileName}
+          className={`mt-4 py-2 px-4 rounded-lg w-full ${
+            (editMode && !isEdited) || !file || !fileName
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 text-white hover:bg-blue-500"
+          }`}
+        >
+          Submit
+        </button>
+      </form>
     </div>
   );
 }

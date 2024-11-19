@@ -12,7 +12,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link href="/">
               <h1 className="text-xl font-bold text-gray-800">
-                Robinos Admin Dashboard
+                Dashboard
               </h1>
             </Link>
           </div>
@@ -34,6 +34,12 @@ const Navbar = () => {
               className="text-gray-800 hover:text-blue-600 transition duration-200"
             >
               Tokens
+            </Link>
+            <Link
+              href="/chains"
+              className="text-gray-800 hover:text-blue-600 transition duration-200"
+            >
+              Chains
             </Link>
             <Link
               href="/category"

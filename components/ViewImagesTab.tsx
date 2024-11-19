@@ -6,14 +6,15 @@ import axios from "axios";
 import LightPreview from "./ui/LightPreview";
 import DarkPreview from "./ui/DarkPreview";
 import UploadImageTab from "./UploadImageTab";
+import { Player } from "@/db/schema";
 
-export type Player = {
-  id: number;
-  name: string;
-  url: string;
-  created_at: Date;
-  updated_at: Date;
-};
+// export type Player = {
+//   id: number;
+//   name: string;
+//   url: string;
+//   created_at: Date;
+//   updated_at: Date;
+// };
 function ViewImagesTab() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [previewModal, setPreviewModal] = useState<Player | null>(null);
@@ -154,9 +155,7 @@ function ViewImagesTab() {
 
               <UploadImageTab
                 editMode={true}
-                editId={editModal.id}
-                editName={editModal.name}
-                editUrl={editModal.url}
+                editItem={editModal}
                 uploadHandler={uploadHandler}
               />
 

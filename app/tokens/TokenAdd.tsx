@@ -1,5 +1,7 @@
+import Dropdown from "@/components/ui/Dropdown";
+import { Chain, Player } from "@/db/schema";
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 export default function TokenAdd() {
@@ -7,17 +9,42 @@ export default function TokenAdd() {
   const [symbol, setSymbol] = useState("");
   const [address, setAddress] = useState("");
   const [chainId, setChainId] = useState<number | null>(null);
+  const [decimal, setDecimal] = useState<string>("18");
   const [isLoading, setIsLoading] = useState(false);
+
+  const [chains, setChains] = useState<Chain[]>([]);
+  const [images, setImages] = useState<Player[]>([]);
+  const [tokenImage, setTokenImage] = useState<string | null>(null);
+  const [tokenImageId, setTokenImageId] = useState<string | null>(null);
+
+  const getAllData = async () => {
+    try {
+      const [chainRes, playerRes] = await Promise.all([
+        axios.get("/api/getallchains"),
+        axios.get("/api/getallimages"),
+      ]);
+
+      setChains(chainRes.data);
+      setImages(playerRes.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  useEffect(() => {
+    getAllData();
+  }, []);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
       await axios.post("/api/savetoken", {
-        name: name,
         address: address,
         symbol: symbol,
         chainId: chainId,
+        decimal: decimal,
+        image: tokenImageId,
       });
       toast.success(`Token added successfully!`);
       // Reset the form after submission
@@ -41,19 +68,6 @@ export default function TokenAdd() {
       )}
       <h2 className="text-2xl font-semibold mb-4">Add Token Details</h2>
       <form onSubmit={handleFormSubmit}>
-        {/* Token Name */}
-        <label className="block mb-2 font-medium">
-          Token Name
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="border border-gray-300 rounded-lg p-2 w-full"
-            placeholder="Enter token name"
-            required
-          />
-        </label>
-
         {/* Token Symbol */}
         <label className="block mb-2 font-medium">
           Token Symbol
@@ -80,17 +94,51 @@ export default function TokenAdd() {
           />
         </label>
 
-        {/* Chain ID */}
+        {/* Decimal */}
+        <label htmlFor="decimal" className="block font-medium mb-1">
+          Decimal
+        </label>
+        <input
+          type="number"
+          id="decimal"
+          name="decimal"
+          value={decimal}
+          onChange={(e) => setDecimal(e.target.value)}
+          required
+          className="w-full border border-gray-300 rounded-lg p-2"
+          min={0}
+        />
+
+        {/* Chain */}
         <label className="block mb-2 font-medium">
-          Chain ID
-          <input
-            type="number"
-            value={chainId ?? ""}
-            onChange={(e) => setChainId(Number(e.target.value))}
-            className="border border-gray-300 rounded-lg p-2 w-full"
-            placeholder="Enter chain ID"
-            required
+          Chain
+          <Dropdown
+            items={chains}
+            placeholder="Search and select an image"
+            onChange={(value: any) => setChainId(value.id)}
           />
+        </label>
+
+        {/* Image */}
+        <label className="block mb-2 font-medium">
+          Image
+          <Dropdown
+            items={images}
+            placeholder="Search and select an image"
+            onChange={(value: any) => {
+              setTokenImage(
+                images.filter((image) => image.id.toString() == value.id)[0].url
+              );
+              setTokenImageId(value.id);
+            }}
+          />
+          {tokenImage && (
+            <img
+              src={tokenImage}
+              alt="Tpken"
+              className="w-24 h-24 mt-2 rounded-lg border border-gray-300"
+            />
+          )}
         </label>
 
         {/* Submit Button */}

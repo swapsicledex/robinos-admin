@@ -1,71 +1,108 @@
-import React from "react";
-import * as Select from "@radix-ui/react-select";
+import * as React from "react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 
-interface DropdownProps {
-  items: { id: number | string; name: string; url?: string }[];
-  label: string;
-  placeholder: string;
-  onChange: (value: string) => void;
-}
+export type DropdownItem = {
+  id: string | number;
+  name: string;
+  customComponent?: React.ReactNode; // For custom rendering
+};
+
+export type DropdownProps = {
+  items: DropdownItem[];
+  placeholder?: string;
+  allowMultiple?: boolean;
+  onChange: (selectedItems: DropdownItem[] | DropdownItem | null) => void;
+};
 
 const Dropdown: React.FC<DropdownProps> = ({
   items,
-  label,
-  placeholder,
+  placeholder = "Select...",
+  allowMultiple = false,
   onChange,
 }) => {
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [selectedItems, setSelectedItems] = React.useState<DropdownItem[]>([]);
+
+  const handleSelect = (item: DropdownItem) => {
+    if (allowMultiple) {
+      const alreadySelected = selectedItems.some(
+        (selected) => selected.id === item.id
+      );
+      const newSelection = alreadySelected
+        ? selectedItems.filter((selected) => selected.id !== item.id)
+        : [...selectedItems, item];
+
+      setSelectedItems(newSelection);
+      onChange(newSelection);
+    } else {
+      setSelectedItems([item]);
+      onChange(item);
+    }
+  };
+
+  const filteredItems = items.filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="mb-4">
-      <label className="block mb-2 font-medium">{label}</label>
-      <Select.Root onValueChange={onChange}>
-        <Select.Trigger
-          className="border border-gray-300 rounded-lg p-2 w-full flex justify-between items-center"
-          aria-label={label}
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
+        <button className="flex items-center px-4 py-2 my-2 bg-white border rounded-md shadow-sm focus:outline-none hover:bg-gray-50">
+          <span>
+            {allowMultiple
+              ? selectedItems.map((item) => item.name).join(", ") || "Select..."
+              : selectedItems[0]?.name || "Select..."}
+          </span>
+          <ChevronDownIcon className="w-5 h-5 ml-2 text-gray-500" />
+        </button>
+      </DropdownMenu.Trigger>
+
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          className="w-64 p-2 bg-white border rounded-md shadow-lg"
+          sideOffset={4}
         >
-          <Select.Value placeholder={placeholder} />
-          <Select.Icon>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-gray-500"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </Select.Icon>
-        </Select.Trigger>
-        <Select.Content className="z-50 bg-white border border-gray-300 rounded-lg shadow-lg">
-          <Select.ScrollUpButton className="flex items-center justify-center p-2">
-            ▲
-          </Select.ScrollUpButton>
-          <Select.Viewport>
-            {items.map((item) => (
-              <Select.Item
+          {/* Search Bar */}
+          <div className="mb-2">
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-3 py-2 border rounded-md focus:ring focus:ring-blue-300"
+            />
+          </div>
+
+          {/* List Items */}
+          {filteredItems.length ? (
+            filteredItems.map((item) => (
+              <DropdownMenu.Item
                 key={item.id}
-                value={item.id.toString()}
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                className="flex items-center px-3 py-2 rounded-md hover:bg-gray-100 focus:outline-none"
+                onSelect={() => handleSelect(item)}
               >
-                {item.url && (
-                  <img
-                    src={item.url}
-                    alt={item.name}
-                    className="w-6 h-6 rounded-full"
+                {allowMultiple && (
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.some(
+                      (selected) => selected.id === item.id
+                    )}
+                    readOnly
+                    className="w-4 h-4 mr-2 rounded border-gray-300"
                   />
                 )}
-                <Select.ItemText>{item.name}</Select.ItemText>
-              </Select.Item>
-            ))}
-          </Select.Viewport>
-          <Select.ScrollDownButton className="flex items-center justify-center p-2">
-            ▼
-          </Select.ScrollDownButton>
-        </Select.Content>
-      </Select.Root>
-    </div>
+                {item.customComponent || (
+                  <span className="text-sm font-medium">{item.name}</span>
+                )}
+              </DropdownMenu.Item>
+            ))
+          ) : (
+            <div className="p-2 text-sm text-gray-500">No items found</div>
+          )}
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
   );
 };
 
