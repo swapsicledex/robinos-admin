@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 
 export type DropdownItem = {
   id: string | number;
@@ -17,7 +17,6 @@ export type DropdownProps = {
 
 const Dropdown: React.FC<DropdownProps> = ({
   items,
-  placeholder = "Select...",
   allowMultiple = false,
   onChange,
 }) => {

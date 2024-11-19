@@ -155,6 +155,7 @@ export default function ChainAdd() {
           <Dropdown
             items={images}
             placeholder="Search and select an image"
+            // eslint-disable-next-line  @typescript-eslint/no-explicit-any
             onChange={(value: any) => {
               setChainImage(
                 images.filter((image) => image.id.toString() == value.id)[0].url

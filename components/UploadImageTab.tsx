@@ -192,6 +192,7 @@ export default function UploadImageTab({
               name: category.category,
             }))}
             placeholder="Choose a category"
+            // eslint-disable-next-line  @typescript-eslint/no-explicit-any
             onChange={(value: any) => {
               setSelectedCategory(value.id);
             }}

@@ -166,7 +166,9 @@ export default function EventCreate() {
             <Dropdown
               items={chains}
               placeholder="Select chains"
+              // eslint-disable-next-line  @typescript-eslint/no-explicit-any
               onChange={(value: any) =>
+                // eslint-disable-next-line  @typescript-eslint/no-explicit-any
                 setOnChains(value.map((item: any) => item.id))
               }
               allowMultiple={true}
@@ -216,6 +218,7 @@ export default function EventCreate() {
                 name: cat.category,
               }))}
               placeholder="Search and select a category"
+              // eslint-disable-next-line  @typescript-eslint/no-explicit-any
               onChange={(value: any) => {
                 setCategory(value.id);
                 if (value.name === "Football") {
@@ -246,6 +249,7 @@ export default function EventCreate() {
             <Dropdown
               items={tokens.map((tok) => ({ id: tok.id, name: tok.symbol }))}
               placeholder="Search and select a token"
+              // eslint-disable-next-line  @typescript-eslint/no-explicit-any
               onChange={(value: any) => setToken(value.id)}
             />
           </label>
@@ -258,6 +262,7 @@ export default function EventCreate() {
             <Dropdown
               items={images}
               placeholder="Search and select an image"
+              // eslint-disable-next-line  @typescript-eslint/no-explicit-any
               onChange={(value: any) => {
                 setTeamAImage(
                   images.filter((image) => image.id.toString() == value.id)[0]
@@ -283,6 +288,7 @@ export default function EventCreate() {
             <Dropdown
               items={images}
               placeholder="Search and select an image"
+              // eslint-disable-next-line  @typescript-eslint/no-explicit-any
               onChange={(value: any) => {
                 setTeamBImage(
                   images.filter((image) => image.id.toString() == value.id)[0]

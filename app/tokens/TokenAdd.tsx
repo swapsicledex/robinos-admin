@@ -5,7 +5,6 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 export default function TokenAdd() {
-  const [name, setName] = useState("");
   const [symbol, setSymbol] = useState("");
   const [address, setAddress] = useState("");
   const [chainId, setChainId] = useState<number | null>(null);
@@ -48,7 +47,6 @@ export default function TokenAdd() {
       });
       toast.success(`Token added successfully!`);
       // Reset the form after submission
-      setName("");
       setSymbol("");
       setAddress("");
       setChainId(null);
@@ -115,6 +113,7 @@ export default function TokenAdd() {
           <Dropdown
             items={chains}
             placeholder="Search and select an image"
+            // eslint-disable-next-line  @typescript-eslint/no-explicit-any
             onChange={(value: any) => setChainId(value.id)}
           />
         </label>
@@ -125,6 +124,7 @@ export default function TokenAdd() {
           <Dropdown
             items={images}
             placeholder="Search and select an image"
+            // eslint-disable-next-line  @typescript-eslint/no-explicit-any
             onChange={(value: any) => {
               setTokenImage(
                 images.filter((image) => image.id.toString() == value.id)[0].url
