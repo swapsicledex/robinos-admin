@@ -32,9 +32,8 @@ export const players = pgTable("players", {
 
 // Chains Table
 export const chains = pgTable("chains", {
-  id: serial("id").primaryKey(),
   name: varchar("name", { length: 63 }).notNull(),
-  chainId: integer("chain_id").notNull(),
+  chainId: integer("chain_id").primaryKey(),
   explorerUrl: varchar("explorer_url", { length: 63 }).notNull(),
   subdomainUrl: varchar("subdomain_url", { length: 63 }),
   isActive: boolean("is_active").default(false),
@@ -52,7 +51,7 @@ export const tokens = pgTable("tokens", {
   symbol: varchar("symbol", { length: 31 }).notNull(),
   address: varchar("address", { length: 63 }).notNull(),
   chainId: integer("chain_id")
-    .references(() => chains.id)
+    .references(() => chains.chainId)
     .notNull(),
   image: integer("image").references(() => players.id),
   decimal: integer("decimal").notNull(),
@@ -63,8 +62,11 @@ export const events = pgTable("events", {
   id: serial("id").primaryKey(),
   code: varchar("code", { length: 255 }).notNull(),
   saleEnd: bigint("sale_end", { mode: "number" }).notNull(),
-  isDeployed: boolean("is_deployed").array(),
+  isDeployed: boolean("is_deployed").default(false),
   isFeatured: boolean("is_featured").notNull(),
+  chainId: integer("chain_id")
+    .references(() => chains.chainId)
+    .notNull(),
   teamA: integer("team_a")
     .references(() => players.id)
     .notNull(),
@@ -78,8 +80,7 @@ export const events = pgTable("events", {
     .references(() => category.id)
     .notNull(),
   conditions: text("conditions").array(),
-  onChains: numeric("on_chains").array().notNull(),
-  handicap: decimal("handicap")
+  handicap: decimal("handicap"),
 });
 
 export type Player = typeof players.$inferSelect;

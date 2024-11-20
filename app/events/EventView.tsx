@@ -34,7 +34,7 @@ export default function EventView() {
               <tr className="bg-gray-100">
                 <th className="border-b py-2 px-4">Event Name</th>
                 <th className="border-b py-2 px-4">Sale End Time</th>
-                <th className="border-b py-2 px-4">Is Deployed</th>
+                <th className="border-b py-2 px-4">Chain Id</th>
               </tr>
             </thead>
             <tbody>
@@ -47,7 +47,7 @@ export default function EventView() {
                     ).toLocaleString()}
                   </td>
                   <td className="border-b py-2 px-4">
-                    {event.isDeployed ? "Yes" : "No"}
+                    {event.chainId}
                   </td>
                 </tr>
               ))}

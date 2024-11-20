@@ -6,7 +6,7 @@ import axios from "axios";
 import Dropdown from "@/components/ui/Dropdown";
 import { toast } from "react-toastify";
 import { Category, Chain, Player, Token } from "@/db/schema";
-// import { PlusIcon} from "@heroicons/react/solid";
+import Image from "next/image";
 
 export default function EventCreate() {
   const [eventName, setEventName] = useState("");
@@ -16,10 +16,8 @@ export default function EventCreate() {
   const [teamAId, setTeamAId] = useState<string | null>(null);
   const [teamBId, setTeamBId] = useState<string | null>(null);
   const [category, setCategory] = useState("");
-  const [token, setToken] = useState("");
   const [isFeatured, setIsFeatured] = useState(false);
   const [conditions, setConditions] = useState<string[]>([""]);
-  const [onChains, setOnChains] = useState<string[]>([]);
   const [handicap, setHandicap] = useState<string | null>(null);
   const [showHandicap, setShowHandicap] = useState<boolean>(false);
 
@@ -28,6 +26,10 @@ export default function EventCreate() {
   const [tokens, setTokens] = useState<Token[]>([]);
   const [chains, setChains] = useState<Chain[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [chainsTokens, setChainsTokens] = useState<
+    { chainId: string; tokenId: string }[]
+  >([{ chainId: "", tokenId: "" }]); // Dynamic list of chain-token pairs
 
   const getAllData = async () => {
     setIsLoading(true);
@@ -58,28 +60,31 @@ export default function EventCreate() {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    const data = {
-      code: eventName,
-      saleEnd: saleEndTime,
-      isFeatured: isFeatured,
-      category: category,
-      teamA: teamAId,
-      teamB: teamBId,
-      tokenAddress: token,
-      onChains: onChains,
-      isDeployed: new Array(onChains.length).fill([false]),
-      conditions: conditions,
-      handicap: handicap,
-    };
-    console.log("data: ", data);
-    try {
-      await axios.post("/api/saveevent", data);
-      toast.success(`Event created successfully!`);
-      handleReset();
-    } catch (error) {
-      toast.error(`Event creating error`);
-      console.log("Error in pusing event data to db: ", error);
-    }
+    chainsTokens.forEach(async (item) => {
+      const data = {
+        code: eventName,
+        saleEnd: saleEndTime,
+        isFeatured: isFeatured,
+        category: category,
+        teamA: teamAId,
+        teamB: teamBId,
+        chainId: item.chainId,
+        tokenAddress: item.tokenId,
+        conditions:
+          conditions.length === 1 && conditions[0] === "" ? null : conditions,
+        handicap: handicap,
+      };
+      console.log("data: ", data);
+      try {
+        await axios.post("/api/saveevent", data);
+        toast.success(`Event successfully created on ${item.chainId}!`);
+        handleReset();
+      } catch (error) {
+        toast.error(`Event creating error`);
+        console.log("Error in pusing event data to db: ", error);
+      }
+    });
+
     setIsLoading(false);
   };
 
@@ -105,6 +110,26 @@ export default function EventCreate() {
     setConditions(updatedConditions);
   };
 
+  const handleAddChainTokenRow = () => {
+    setChainsTokens([...chainsTokens, { chainId: "", tokenId: "" }]);
+  };
+
+  const handleRemoveChainTokenRow = (index: number) => {
+    setChainsTokens(chainsTokens.filter((_, i) => i !== index));
+  };
+
+  const handleChainChange = (index: number, chainId: string) => {
+    const updated = [...chainsTokens];
+    updated[index].chainId = chainId;
+    setChainsTokens(updated);
+  };
+
+  const handleTokenChange = (index: number, tokenId: string) => {
+    const updated = [...chainsTokens];
+    updated[index].tokenId = tokenId;
+    setChainsTokens(updated);
+  };
+
   return (
     <>
       {isLoading && (
@@ -119,143 +144,163 @@ export default function EventCreate() {
         <h2 className="text-2xl font-semibold mb-6">Create New Event</h2>
 
         {/* Event Details Section */}
-        <fieldset className="mb-6 border border-gray-200 rounded-lg p-4">
-          <legend className="text-lg font-medium text-gray-700 px-2">
-            Event Details
-          </legend>
+        <div className="mb-6">
+          <label className="block font-medium mb-2">Event Name</label>
+          <input
+            type="text"
+            value={eventName}
+            onChange={(e) => setEventName(e.target.value)}
+            className="border border-gray-300 rounded-lg p-2 w-full"
+            required
+          />
+        </div>
 
-          <label className="block mb-4 font-medium">
-            Event Name
-            <input
-              type="text"
-              value={eventName}
-              onChange={(e) => setEventName(e.target.value)}
-              className="border border-gray-300 rounded-lg p-2 w-full mt-1"
-              required
-            />
-          </label>
-
-          <label className="block font-medium">
+        <div className="mb-6">
+          <label className="block font-medium mb-2">
             Sale End Time (Unix Timestamp)
-            <input
-              type="number"
-              value={saleEndTime}
-              onChange={(e) => setSaleEndTime(e.target.value)}
-              className="border border-gray-300 rounded-lg p-2 w-full mt-1"
-              placeholder="Enter a timestamp in seconds"
-              required
-            />
           </label>
+          <input
+            type="number"
+            value={saleEndTime}
+            onChange={(e) => setSaleEndTime(e.target.value)}
+            className="border border-gray-300 rounded-lg p-2 w-full"
+            placeholder="Enter a timestamp in seconds"
+            required
+          />
+        </div>
 
-          <div className="mt-4 mb-2">
-            <label className="block font-medium mb-1">
-              <input
-                type="checkbox"
-                name="isFeatured"
-                checked={isFeatured}
-                onChange={(e) => setIsFeatured(e.target.checked)}
-                className="mr-2"
-              />
-              Is Featured
-            </label>
-          </div>
-          <div>
-            <label htmlFor="onChains" className="block font-medium mb-1">
-              On Chains
-            </label>
-            <Dropdown
-              items={chains}
-              placeholder="Select chains"
-              // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-              onChange={(value: any) =>
-                // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-                setOnChains(value.map((item: any) => item.id))
-              }
-              allowMultiple={true}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="conditions" className="block font-medium mb-1">
-              Conditions
-            </label>
-            {conditions.map((condition, index) => (
-              <div key={index} className="flex items-center space-x-2 mb-2">
-                <input
-                  type="text"
-                  value={condition}
-                  onChange={(e) => handleConditionChange(index, e.target.value)}
-                  className="flex-1 border border-gray-300 rounded-lg p-2"
-                  placeholder={`Condition ${index + 1}`}
-                />
-                <button
-                  type="button"
-                  onClick={addConditionField}
-                  className="bg-green-500 text-white rounded-lg p-2 hover:bg-green-600 transition"
-                  title="Add Condition"
-                >
-                  +
-                </button>
-                {conditions.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeConditionField(index)}
-                    className="bg-red-500 text-white rounded-lg p-2 hover:bg-red-600 transition"
-                    title="Remove Condition"
-                  >
-                    -
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-
+        <div className="mt-4 mb-2">
           <label className="block font-medium mb-1">
-            Category
-            <Dropdown
-              items={categories.map((cat) => ({
-                id: cat.id,
-                name: cat.category,
-              }))}
-              placeholder="Search and select a category"
-              // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-              onChange={(value: any) => {
-                setCategory(value.id);
-                if (value.name === "Football") {
-                  setShowHandicap(true);
-                }
-              }}
+            <input
+              type="checkbox"
+              name="isFeatured"
+              checked={isFeatured}
+              onChange={(e) => setIsFeatured(e.target.checked)}
+              className="mr-2"
             />
+            Is Featured
           </label>
-
-          {showHandicap && (
-            <div>
-              <label htmlFor="handicap" className="block font-medium mb-1">
-                Handicap
-              </label>
+        </div>
+        <div>
+          <label htmlFor="conditions" className="block font-medium mb-1">
+            Conditions
+          </label>
+          {conditions.map((condition, index) => (
+            <div key={index} className="flex items-center space-x-2 mb-2">
               <input
                 type="text"
-                id="handicap"
-                name="handicap"
-                value={handicap ?? "0"}
-                onChange={(e) => setHandicap(e.target.value)}
-                className="border border-gray-300 rounded-lg p-2"
+                value={condition}
+                onChange={(e) => handleConditionChange(index, e.target.value)}
+                className="flex-1 border border-gray-300 rounded-lg p-2"
+                placeholder={`Condition ${index + 1}`}
               />
+              <button
+                type="button"
+                onClick={addConditionField}
+                className="bg-green-500 text-white rounded-lg p-2 hover:bg-green-600 transition"
+                title="Add Condition"
+              >
+                +
+              </button>
+              {conditions.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeConditionField(index)}
+                  className="bg-red-500 text-white rounded-lg p-2 hover:bg-red-600 transition"
+                  title="Remove Condition"
+                >
+                  -
+                </button>
+              )}
             </div>
-          )}
+          ))}
+        </div>
 
-          <label className="block font-medium mb-1">
-            Standard Token
-            <Dropdown
-              items={tokens.map((tok) => ({ id: tok.id, name: tok.symbol }))}
-              placeholder="Search and select a token"
-              // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-              onChange={(value: any) => setToken(value.id)}
+        <label className="block font-medium mb-1">
+          Category
+          <Dropdown
+            items={categories.map((cat) => ({
+              id: cat.id,
+              name: cat.category,
+            }))}
+            placeholder="Search and select a category"
+            // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+            onChange={(value: any) => {
+              setCategory(value.id);
+              if (value.name === "Football") {
+                setShowHandicap(true);
+              }
+            }}
+          />
+        </label>
+
+        {showHandicap && (
+          <div>
+            <label htmlFor="handicap" className="block font-medium mb-1">
+              Handicap
+            </label>
+            <input
+              type="text"
+              id="handicap"
+              name="handicap"
+              value={handicap ?? "0"}
+              onChange={(e) => setHandicap(e.target.value)}
+              className="border border-gray-300 rounded-lg p-2"
             />
-          </label>
+          </div>
+        )}
+
+        {/* Dynamic Chain-Token Section */}
+        <fieldset className="mb-6 border border-gray-200 rounded-lg p-4">
+          <legend className="text-lg font-medium text-gray-700 px-2">
+            Chains and Tokens
+          </legend>
+
+          {chainsTokens.map((chainToken, index) => (
+            <div key={index} className="flex items-center gap-4 mb-4">
+              <div className="flex-1">
+                <Dropdown
+                  items={chains.map((chain) => ({
+                    id: chain.chainId,
+                    name: chain.name,
+                  }))}
+                  placeholder="Select a chain"
+                  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+                  onChange={(value: any) => handleChainChange(index, value.id)}
+                />
+              </div>
+              <div className="flex-1">
+                <Dropdown
+                  items={tokens.map((token) => ({
+                    id: token.id,
+                    name: token.symbol,
+                  }))}
+                  placeholder="Select a token"
+                  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+                  onChange={(value: any) => handleTokenChange(index, value.id)}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => handleRemoveChainTokenRow(index)}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                title="Remove Chain-Token Pair"
+              >
+                -
+              </button>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={handleAddChainTokenRow}
+            className="bg-green-500 text-white px-4 py-2 rounded-lg"
+          >
+            Add Chain-Token
+          </button>
         </fieldset>
 
-        {/* Team A Section */}
+        {/* Team ASection */}
         <fieldset className="mb-6 border border-gray-200 rounded-lg p-4">
           <label className="block mb-4 font-medium">
             Team A
@@ -272,15 +317,16 @@ export default function EventCreate() {
               }}
             />
             {teamAImage && (
-              <img
+              <Image
                 src={teamAImage}
-                alt="Team A"
+                height={50}
+                width={50}
+                alt="Team B"
                 className="w-24 h-24 mt-2 rounded-lg border border-gray-300"
               />
             )}
           </label>
         </fieldset>
-
         {/* Team B Section */}
         <fieldset className="mb-6 border border-gray-200 rounded-lg p-4">
           <label className="block mb-4 font-medium">
@@ -298,9 +344,11 @@ export default function EventCreate() {
               }}
             />
             {teamBImage && (
-              <img
+              <Image
                 src={teamBImage}
                 alt="Team B"
+                height={50}
+                width={50}
                 className="w-24 h-24 mt-2 rounded-lg border border-gray-300"
               />
             )}
@@ -310,7 +358,6 @@ export default function EventCreate() {
         <button
           type="submit"
           className="bg-blue-600 text-white px-4 py-2 rounded-lg w-full"
-          disabled={isLoading}
         >
           Create Event
         </button>

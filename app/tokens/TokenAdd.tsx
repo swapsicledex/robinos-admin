@@ -111,7 +111,10 @@ export default function TokenAdd() {
         <label className="block mb-2 font-medium">
           Chain
           <Dropdown
-            items={chains}
+            items={chains.map((chain) => ({
+              id: chain.chainId,
+              name: chain.name,
+            }))}
             placeholder="Search and select an image"
             // eslint-disable-next-line  @typescript-eslint/no-explicit-any
             onChange={(value: any) => setChainId(value.id)}

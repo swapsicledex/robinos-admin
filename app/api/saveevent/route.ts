@@ -12,8 +12,8 @@ export async function POST(request: NextRequest) {
     teamA: body.teamA,
     teamB: body.teamB,
     tokenAddress: body.tokenAddress,
-    onChains: body.onChains,
-    isDeployed: body.isDeployed,
+    chainId: body.chainId,
+    isDeployed: false,
     conditions: body.conditions,
     handicap: body.handicap,
   };
