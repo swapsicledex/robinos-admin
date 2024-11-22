@@ -15,7 +15,8 @@ export async function POST(request: NextRequest) {
     chainId: body.chainId,
     isDeployed: false,
     conditions: body.conditions,
-    handicap: body.handicap,
+    handicapTeamA: body.handicapA,
+    handicapTeamB: body.handicapB,
   };
   const newEvent = await db.insert(events).values(event).returning();
   return Response.json(newEvent[0]);

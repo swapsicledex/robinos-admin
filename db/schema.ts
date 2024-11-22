@@ -80,7 +80,8 @@ export const events = pgTable("events", {
     .references(() => category.id)
     .notNull(),
   conditions: text("conditions").array(),
-  handicap: decimal("handicap"),
+  handicapTeamA: decimal("handicap_team_a"),
+  handicapTeamB: decimal("handicap_team_b"),
 });
 
 export type Player = typeof players.$inferSelect;

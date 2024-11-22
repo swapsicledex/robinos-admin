@@ -18,7 +18,8 @@ export default function EventCreate() {
   const [category, setCategory] = useState("");
   const [isFeatured, setIsFeatured] = useState(false);
   const [conditions, setConditions] = useState<string[]>([""]);
-  const [handicap, setHandicap] = useState<string | null>(null);
+  const [handicapA, setHandicapA] = useState<string | null>(null);
+  const [handicapB, setHandicapB] = useState<string | null>(null);
   const [showHandicap, setShowHandicap] = useState<boolean>(false);
 
   const [images, setImages] = useState<Player[]>([]);
@@ -29,7 +30,7 @@ export default function EventCreate() {
 
   const [chainsTokens, setChainsTokens] = useState<
     { chainId: string; tokenId: string }[]
-  >([{ chainId: "", tokenId: "" }]); // Dynamic list of chain-token pairs
+  >([{ chainId: "", tokenId: "" }]);
 
   const getAllData = async () => {
     setIsLoading(true);
@@ -72,7 +73,8 @@ export default function EventCreate() {
         tokenAddress: item.tokenId,
         conditions:
           conditions.length === 1 && conditions[0] === "" ? null : conditions,
-        handicap: handicap,
+        handicapA: handicapA,
+        handicapB: handicapB,
       };
       console.log("data: ", data);
       try {
@@ -89,12 +91,16 @@ export default function EventCreate() {
   };
 
   const handleReset = () => {
-    // setEventName("");
-    // setSaleEndTime("");
-    // setTeamAImage(null);
-    // setTeamBImage(null);
-    // setCategory("");
-    // setToken("");
+    setEventName("");
+    setSaleEndTime("");
+    setTeamAImage(null);
+    setTeamBImage(null);
+    setCategory("");
+    setChainsTokens([{ chainId: "", tokenId: "" }]);
+    setConditions([""]);
+    setTeamAId(null);
+    setTeamBId(null);
+    setIsFeatured(false);
   };
 
   const handleConditionChange = (index: number, value: string) => {
@@ -181,7 +187,7 @@ export default function EventCreate() {
             Is Featured
           </label>
         </div>
-        <div>
+        <fieldset className="my-8 border border-gray-200 rounded-lg p-4">
           <label htmlFor="conditions" className="block font-medium mb-1">
             Conditions
           </label>
@@ -214,41 +220,59 @@ export default function EventCreate() {
               )}
             </div>
           ))}
-        </div>
+        </fieldset>
 
-        <label className="block font-medium mb-1">
-          Category
-          <Dropdown
-            items={categories.map((cat) => ({
-              id: cat.id,
-              name: cat.category,
-            }))}
-            placeholder="Search and select a category"
-            // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-            onChange={(value: any) => {
-              setCategory(value.id);
-              if (value.name === "Football") {
-                setShowHandicap(true);
-              }
-            }}
-          />
-        </label>
-
-        {showHandicap && (
-          <div>
-            <label htmlFor="handicap" className="block font-medium mb-1">
-              Handicap
-            </label>
-            <input
-              type="text"
-              id="handicap"
-              name="handicap"
-              value={handicap ?? "0"}
-              onChange={(e) => setHandicap(e.target.value)}
-              className="border border-gray-300 rounded-lg p-2"
+        <fieldset className="mb-6 border border-gray-200 rounded-lg p-4 mt-4">
+          <label className="block mb-4 font-medium">
+            Category
+            <Dropdown
+              items={categories.map((cat) => ({
+                id: cat.id,
+                name: cat.category,
+              }))}
+              placeholder="Search and select a category"
+              // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+              onChange={(value: any) => {
+                setCategory(value.id);
+                if (value.name === "Football") {
+                  setShowHandicap(true);
+                } else {
+                  setShowHandicap(false);
+                }
+              }}
             />
-          </div>
-        )}
+          </label>
+          {showHandicap && (
+            <div className="flex flex-row justify-between">
+              <div>
+                <label htmlFor="handicapA" className="block font-medium mb-1">
+                  Handicap Team A
+                </label>
+                <input
+                  type="text"
+                  id="handicapA"
+                  name="handicapA"
+                  value={handicapA ?? ""}
+                  onChange={(e) => setHandicapA(e.target.value)}
+                  className="border border-gray-300 rounded-lg p-2"
+                />
+              </div>
+              <div>
+                <label htmlFor="handicapB" className="block font-medium mb-1">
+                  Handicap Team B
+                </label>
+                <input
+                  type="text"
+                  id="handicapB"
+                  name="handicapB"
+                  value={handicapB ?? ""}
+                  onChange={(e) => setHandicapB(e.target.value)}
+                  className="border border-gray-300 rounded-lg p-2"
+                />
+              </div>
+            </div>
+          )}
+        </fieldset>
 
         {/* Dynamic Chain-Token Section */}
         <fieldset className="mb-6 border border-gray-200 rounded-lg p-4">
