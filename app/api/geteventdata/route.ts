@@ -1,10 +1,10 @@
 import { db } from "@/db/drizzle";
 import { events, players, tokens, category } from "@/db/schema";
 import { eq, gte, lte, and, aliasedTable } from "drizzle-orm";
-import { NextApiRequest } from "next";
+import { NextRequest } from "next/server";
 import { parse } from "querystring";
 
-export async function GET(req: NextApiRequest) {
+export async function GET(req: NextRequest) {
   if (req.method === "GET") {
     const queryParams = parse(req.url?.split("?")[1] || "");
 
