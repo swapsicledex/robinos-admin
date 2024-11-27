@@ -1,4 +1,4 @@
-import Dropdown from "@/components/ui/Dropdown";
+import Dropdown from "@/components/dashboard/ui/Dropdown";
 import { Player } from "@/db/schema";
 import axios from "axios";
 import React, { useEffect, useState } from "react";

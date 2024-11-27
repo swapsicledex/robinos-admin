@@ -1,5 +1,5 @@
 // pages/index.tsx
-import Navbar from "@/components/ui/Navbar";
+import Navbar from "@/components/dashboard/ui/Navbar";
 import Link from "next/link";
 
 export default function Home() {
@@ -52,6 +52,13 @@ export default function Home() {
           >
             <h2 className="text-2xl font-semibold mb-2">Categories &rarr;</h2>
             <p>View and manage category records.</p>
+          </Link>
+          <Link
+            href="/tournaments"
+            className="bg-white shadow-lg rounded-lg p-6 transition transform hover:scale-105 hover:bg-blue-100"
+          >
+            <h2 className="text-2xl font-semibold mb-2">Tournaments &rarr;</h2>
+            <p>View and manage tournament records.</p>
           </Link>
         </div>
       </div>

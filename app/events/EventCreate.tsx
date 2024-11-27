@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import "react-tabs/style/react-tabs.css";
 import axios from "axios";
-import Dropdown from "@/components/ui/Dropdown";
+import Dropdown from "@/components/dashboard/ui/Dropdown";
 import { toast } from "react-toastify";
-import { Category, Chain, Player, Token } from "@/db/schema";
+import { Category, Chain, Player, Token, Tournament } from "@/db/schema";
 import Image from "next/image";
 
 export default function EventCreate() {
@@ -16,6 +16,7 @@ export default function EventCreate() {
   const [teamAId, setTeamAId] = useState<string | null>(null);
   const [teamBId, setTeamBId] = useState<string | null>(null);
   const [category, setCategory] = useState("");
+  const [tournament, setTournament] = useState("");
   const [isFeatured, setIsFeatured] = useState(false);
   const [conditions, setConditions] = useState<string[]>([""]);
   const [handicapA, setHandicapA] = useState<string | null>(null);
@@ -26,6 +27,8 @@ export default function EventCreate() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [tokens, setTokens] = useState<Token[]>([]);
   const [chains, setChains] = useState<Chain[]>([]);
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+
   const [isLoading, setIsLoading] = useState(false);
 
   const [chainsTokens, setChainsTokens] = useState<
@@ -35,18 +38,25 @@ export default function EventCreate() {
   const getAllData = async () => {
     setIsLoading(true);
     try {
-      const [imagesData, categoriesData, tokensData, chainsData] =
-        await Promise.all([
-          axios.get("/api/getallimages"),
-          axios.get("/api/getallcategories"),
-          axios.get("/api/getalltokens"),
-          axios.get("/api/getallchains"),
-        ]);
+      const [
+        imagesData,
+        categoriesData,
+        tokensData,
+        chainsData,
+        tournamentsData,
+      ] = await Promise.all([
+        axios.get("/api/getallimages"),
+        axios.get("/api/getallcategories"),
+        axios.get("/api/getalltokens"),
+        axios.get("/api/getallchains"),
+        axios.get("/api/getalltournaments"),
+      ]);
 
       setImages(imagesData.data);
       setCategories(categoriesData.data);
       setTokens(tokensData.data);
       setChains(chainsData.data);
+      setTournaments(tournamentsData.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -75,8 +85,8 @@ export default function EventCreate() {
           conditions.length === 1 && conditions[0] === "" ? null : conditions,
         handicapA: handicapA,
         handicapB: handicapB,
+        tournament: tournament,
       };
-      console.log("data: ", data);
       try {
         await axios.post("/api/saveevent", data);
         toast.success(`Event successfully created on ${item.chainId}!`);
@@ -101,6 +111,7 @@ export default function EventCreate() {
     setTeamAId(null);
     setTeamBId(null);
     setIsFeatured(false);
+    setTournament("");
   };
 
   const handleConditionChange = (index: number, value: string) => {
@@ -272,6 +283,17 @@ export default function EventCreate() {
               </div>
             </div>
           )}
+          <label className="block mb-4 font-medium">
+            Tournament
+            <Dropdown
+              items={tournaments}
+              placeholder="Search and select a tournament"
+              // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+              onChange={(value: any) => {
+                setTournament(value.id);
+              }}
+            />
+          </label>
         </fieldset>
 
         {/* Dynamic Chain-Token Section */}

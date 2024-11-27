@@ -1,10 +1,11 @@
-import Dropdown from "@/components/ui/Dropdown";
+import Dropdown from "@/components/dashboard/ui/Dropdown";
 import { Chain, Player } from "@/db/schema";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 export default function TokenAdd() {
+    const [name, setName] = useState("");
   const [symbol, setSymbol] = useState("");
   const [address, setAddress] = useState("");
   const [chainId, setChainId] = useState<number | null>(null);
@@ -41,6 +42,7 @@ export default function TokenAdd() {
       await axios.post("/api/savetoken", {
         address: address,
         symbol: symbol,
+        name:name,
         chainId: chainId,
         decimal: decimal,
         image: tokenImageId,
@@ -49,6 +51,7 @@ export default function TokenAdd() {
       // Reset the form after submission
       setSymbol("");
       setAddress("");
+      setName("");
       setChainId(null);
     } catch (error) {
       toast.error(`Token add failed`);
@@ -66,6 +69,18 @@ export default function TokenAdd() {
       )}
       <h2 className="text-2xl font-semibold mb-4">Add Token Details</h2>
       <form onSubmit={handleFormSubmit}>
+        {/* Token Name */}
+        <label className="block mb-2 font-medium">
+          Token Name
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="border border-gray-300 rounded-lg p-2 w-full"
+            placeholder="Enter token name"
+            required
+          />
+        </label>
         {/* Token Symbol */}
         <label className="block mb-2 font-medium">
           Token Symbol

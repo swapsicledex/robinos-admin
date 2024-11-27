@@ -3,8 +3,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 // import { deleteobject } from "@/utils/deleteObject";
-import LightPreview from "./ui/LightPreview";
-import DarkPreview from "./ui/DarkPreview";
+import LightPreview from "../../components/dashboard/ui/LightPreview";
+import DarkPreview from "../../components/dashboard/ui/DarkPreview";
 import UploadImageTab from "./UploadImageTab";
 import { Player } from "@/db/schema";
 
