@@ -1,4 +1,3 @@
-import { tournaments } from "./../../../db/schema";
 import { db } from "@/db/drizzle";
 import { events, NewEvent } from "@/db/schema";
 import { NextRequest } from "next/server";
