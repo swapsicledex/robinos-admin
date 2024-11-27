@@ -1,7 +1,7 @@
 "use client";
 
 import { Tabs, TabList, Tab, TabPanel } from "react-tabs";
-import Navbar from "@/components/ui/Navbar";
+import Navbar from "@/components/dashboard/ui/Navbar";
 import ChainAdd from "./ChainAdd";
 import ChainsView from "./ChainsView";
 

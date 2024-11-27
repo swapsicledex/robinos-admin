@@ -3,9 +3,9 @@ import { Tabs, TabList, Tab, TabPanel } from "react-tabs";
 import "react-toastify/dist/ReactToastify.css";
 import "react-tabs/style/react-tabs.css";
 
-import ViewImagesTab from "@/components/ViewImagesTab";
-import UploadImageTab from "@/components/UploadImageTab";
-import Navbar from "@/components/ui/Navbar";
+import ViewImagesTab from "@/app/players/ViewImagesTab";
+import UploadImageTab from "@/app/players/UploadImageTab";
+import Navbar from "@/components/dashboard/ui/Navbar";
 
 function Players() {
   return (

@@ -1,3 +1,4 @@
+import { tournaments } from "./../../../db/schema";
 import { db } from "@/db/drizzle";
 import { events, NewEvent } from "@/db/schema";
 import { NextRequest } from "next/server";
@@ -17,6 +18,7 @@ export async function POST(request: NextRequest) {
     conditions: body.conditions,
     handicapTeamA: body.handicapA,
     handicapTeamB: body.handicapB,
+    tournament: body.tournament,
   };
   const newEvent = await db.insert(events).values(event).returning();
   return Response.json(newEvent[0]);

@@ -11,9 +11,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link href="/">
-              <h1 className="text-xl font-bold text-gray-800">
-                Dashboard
-              </h1>
+              <h1 className="text-xl font-bold text-gray-800">Dashboard</h1>
             </Link>
           </div>
           <div className="flex space-x-4">
@@ -41,11 +39,18 @@ const Navbar = () => {
             >
               Chains
             </Link>
+
             <Link
               href="/category"
               className="text-gray-800 hover:text-blue-600 transition duration-200"
             >
               Categories
+            </Link>
+            <Link
+              href="/tournaments"
+              className="text-gray-800 hover:text-blue-600 transition duration-200"
+            >
+              Tournaments
             </Link>
           </div>
         </div>

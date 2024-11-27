@@ -3,10 +3,10 @@ import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import { toast } from "react-toastify";
-import LightPreview from "@/components/ui/LightPreview";
-import DarkPreview from "@/components/ui/DarkPreview";
-import Dropdown from "./ui/Dropdown";
+import LightPreview from "@/components/dashboard/ui/LightPreview";
+import DarkPreview from "@/components/dashboard/ui/DarkPreview";
 import { Category, Player } from "@/db/schema";
+import Dropdown from "@/components/dashboard/ui/Dropdown";
 
 export default function UploadImageTab({
   editMode,

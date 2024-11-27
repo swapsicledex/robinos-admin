@@ -6,6 +6,7 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const token: NewToken = {
     address: body.address,
+    name: body.name,
     symbol: body.symbol,
     chainId: body.chainId,
     decimal: body.decimal,

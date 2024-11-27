@@ -48,6 +48,7 @@ export const chains = pgTable("chains", {
 // Tokens Table
 export const tokens = pgTable("tokens", {
   id: serial("id").primaryKey(),
+  name: varchar("name", { length: 63 }),
   symbol: varchar("symbol", { length: 31 }).notNull(),
   address: varchar("address", { length: 63 }).notNull(),
   chainId: integer("chain_id")
@@ -79,9 +80,19 @@ export const events = pgTable("events", {
   category: integer("category")
     .references(() => category.id)
     .notNull(),
+  tournament: integer("tournament")
+    .references(() => tournaments.id)
+    .notNull(),
   conditions: text("conditions").array(),
   handicapTeamA: decimal("handicap_team_a"),
   handicapTeamB: decimal("handicap_team_b"),
+});
+
+// Tournaments table
+export const tournaments = pgTable("tournaments", {
+  id: serial("id").primaryKey(),
+  category: integer("category").references(() => category.id), // Foreign key to category table
+  name: varchar("name", { length: 63 }).notNull(),
 });
 
 export type Player = typeof players.$inferSelect;
@@ -94,3 +105,5 @@ export type Token = typeof tokens.$inferSelect;
 export type NewToken = typeof tokens.$inferInsert;
 export type Chain = typeof chains.$inferSelect;
 export type NewChain = typeof chains.$inferInsert;
+export type Tournament = typeof tournaments.$inferSelect;
+export type NewTournament = typeof tournaments.$inferInsert;
