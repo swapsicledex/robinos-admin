@@ -7,6 +7,7 @@ import Dropdown from "@/components/dashboard/ui/Dropdown";
 import { toast } from "react-toastify";
 import { Category, Chain, Player, Token, Tournament } from "@/db/schema";
 import Image from "next/image";
+import DateTimePicker from "@/components/dashboard/ui/DateTimePicker";
 
 export default function EventCreate() {
   const [eventName, setEventName] = useState("");
@@ -114,6 +115,10 @@ export default function EventCreate() {
     setTournament("");
   };
 
+  const handleDateTimeChange = (dateTime: Date) => {
+    setSaleEndTime((dateTime.getTime() / 1000).toString());
+  };
+
   const handleConditionChange = (index: number, value: string) => {
     const updatedConditions = [...conditions];
     updatedConditions[index] = value;
@@ -176,14 +181,8 @@ export default function EventCreate() {
           <label className="block font-medium mb-2">
             Sale End Time (Unix Timestamp)
           </label>
-          <input
-            type="number"
-            value={saleEndTime}
-            onChange={(e) => setSaleEndTime(e.target.value)}
-            className="border border-gray-300 rounded-lg p-2 w-full"
-            placeholder="Enter a timestamp in seconds"
-            required
-          />
+          <DateTimePicker onDateTimeChange={handleDateTimeChange} />
+          <p>Selected Timestamp: {saleEndTime}</p>
         </div>
 
         <div className="mt-4 mb-2">
