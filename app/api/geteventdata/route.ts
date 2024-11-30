@@ -72,13 +72,14 @@ export async function GET(req: NextRequest) {
             },
             standardTokenAddress: tokens.address,
             tokenName: tokens.symbol,
+            tokenDecimal: tokens.decimal,
           })
           .from(events)
           .innerJoin(teamA, eq(teamA.id, events.teamA)) // Join team A
           .innerJoin(teamB, eq(teamB.id, events.teamB)) // Join team B
           .innerJoin(tokens, eq(tokens.id, events.tokenAddress)) // Join tokens
           .innerJoin(category, eq(category.id, events.category)) // Join category
-          .innerJoin(tournaments, eq(tournaments.id, events.tournament)) // Join tournaments
+          .leftJoin(tournaments, eq(tournaments.id, events.tournament)) // Join tournaments
           .where(and(...conditions)) // Apply all conditions
           .limit(parsedLimit)
           .offset(offset)
@@ -91,7 +92,7 @@ export async function GET(req: NextRequest) {
           .innerJoin(teamB, eq(teamB.id, events.teamB))
           .innerJoin(tokens, eq(tokens.id, events.tokenAddress))
           .innerJoin(category, eq(category.id, events.category))
-          .innerJoin(tournaments, eq(tournaments.id, events.tournament))
+          .leftJoin(tournaments, eq(tournaments.id, events.tournament))
           .where(and(...conditions)) // Apply all conditions
           .execute()
           .then((result) => result[0]?.count || 0), // Fetch total count

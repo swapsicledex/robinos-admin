@@ -7,8 +7,6 @@ import {
   timestamp,
   boolean,
   bigint,
-  numeric,
-  decimal,
 } from "drizzle-orm/pg-core";
 
 // Category Table
@@ -80,12 +78,10 @@ export const events = pgTable("events", {
   category: integer("category")
     .references(() => category.id)
     .notNull(),
-  tournament: integer("tournament")
-    .references(() => tournaments.id)
-    .notNull(),
+  tournament: integer("tournament").references(() => tournaments.id),
   conditions: text("conditions").array(),
-  handicapTeamA: decimal("handicap_team_a"),
-  handicapTeamB: decimal("handicap_team_b"),
+  handicapTeamA: varchar("handicap_team_a", { length: 31 }),
+  handicapTeamB: varchar("handicap_team_b", { length: 31 }),
 });
 
 // Tournaments table

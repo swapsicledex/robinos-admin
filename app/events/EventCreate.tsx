@@ -17,7 +17,7 @@ export default function EventCreate() {
   const [teamAId, setTeamAId] = useState<string | null>(null);
   const [teamBId, setTeamBId] = useState<string | null>(null);
   const [category, setCategory] = useState("");
-  const [tournament, setTournament] = useState("");
+  const [tournament, setTournament] = useState(null);
   const [isFeatured, setIsFeatured] = useState(false);
   const [conditions, setConditions] = useState<string[]>([""]);
   const [handicapA, setHandicapA] = useState<string | null>(null);
@@ -112,7 +112,7 @@ export default function EventCreate() {
     setTeamAId(null);
     setTeamBId(null);
     setIsFeatured(false);
-    setTournament("");
+    setTournament(null);
   };
 
   const handleDateTimeChange = (dateTime: Date) => {
