@@ -61,12 +61,12 @@ export async function GET(req: NextRequest) {
             category: category.category,
             tournament: tournaments.name,
             teamA: {
-              name: teamA.name,
+              name: sql`${teamA.name} || ' ' || ${events.handicapTeamA}`,
               symbol: teamA.symbol,
               img: teamA.url,
             },
             teamB: {
-              name: teamB.name,
+              name: sql`${teamB.name} || ' ' || ${events.handicapTeamB}`,
               symbol: teamB.symbol,
               img: teamB.url,
             },
