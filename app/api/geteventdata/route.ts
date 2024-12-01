@@ -61,12 +61,20 @@ export async function GET(req: NextRequest) {
             category: category.category,
             tournament: tournaments.name,
             teamA: {
-              name: sql`${teamA.name} || ' ' || ${events.handicapTeamA}`,
+              name: sql`CASE 
+                      WHEN ${events.handicapTeamA} IS NOT NULL 
+                        THEN ${teamA.symbol} || ' ' || ${events.handicapTeamA} 
+                      ELSE ${teamA.symbol} 
+                    END`,
               symbol: teamA.symbol,
               img: teamA.url,
             },
             teamB: {
-              name: sql`${teamB.name} || ' ' || ${events.handicapTeamB}`,
+              name: sql`CASE 
+                WHEN ${events.handicapTeamA} IS NOT NULL 
+                  THEN ${teamB.symbol} || ' ' || ${events.handicapTeamB} 
+                ELSE ${teamB.symbol} 
+              END`,
               symbol: teamB.symbol,
               img: teamB.url,
             },
