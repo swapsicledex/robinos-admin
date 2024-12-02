@@ -1,7 +1,5 @@
-import Dropdown from "@/components/dashboard/ui/Dropdown";
-import { Player } from "@/db/schema";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 import * as chains from "viem/chains";
 import { v4 as uuidv4 } from "uuid";
