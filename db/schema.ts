@@ -38,7 +38,7 @@ export const chains = pgTable("chains", {
   isMainnet: boolean("is_mainnet").notNull(),
   versusAddress: varchar("versus_address", { length: 63 }),
   standardTokenAddress: varchar("standard_token_address", { length: 63 }),
-  image: integer("image").references(() => players.id),
+  imageUrl: varchar("image_url", { length: 127 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -52,7 +52,7 @@ export const tokens = pgTable("tokens", {
   chainId: integer("chain_id")
     .references(() => chains.chainId)
     .notNull(),
-  image: integer("image").references(() => players.id),
+  imageUrl: varchar("image_url", { length: 127 }),
   decimal: integer("decimal").notNull(),
 });
 
@@ -61,6 +61,7 @@ export const events = pgTable("events", {
   id: serial("id").primaryKey(),
   code: varchar("code", { length: 255 }).notNull(),
   saleEnd: bigint("sale_end", { mode: "number" }).notNull(),
+  saleStart: bigint("sale_start", { mode: "number" }).default(0),
   isDeployed: boolean("is_deployed").default(false),
   isFeatured: boolean("is_featured").notNull(),
   chainId: integer("chain_id")

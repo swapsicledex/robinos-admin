@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     isActive: body.isActive,
     versusAddress: body.versusAddress,
     standardTokenAddress: body.standardTokenAddress,
-    image: body.image,
+    imageUrl: body.image,
   };
   const newChain = await db.insert(chains).values(chain).returning();
   return Response.json(newChain[0]);
