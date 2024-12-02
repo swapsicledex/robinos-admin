@@ -1,9 +1,10 @@
-import Dropdown from "@/components/dashboard/ui/Dropdown";
-import { Player } from "@/db/schema";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 import * as chains from "viem/chains";
+import { v4 as uuidv4 } from "uuid";
+import LightPreview from "@/components/dashboard/ui/LightPreview";
+import DarkPreview from "@/components/dashboard/ui/DarkPreview";
 
 export default function ChainAdd() {
   const [formData, setFormData] = useState({
@@ -17,26 +18,40 @@ export default function ChainAdd() {
     standardTokenAddress: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [images, setImages] = useState<Player[]>([]);
-  const [chainImage, setChainImage] = useState<string | null>(null);
-  const [chainImageId, setChainImageId] = useState<string | null>(null);
 
-  const getAllData = async () => {
-    setIsLoading(true);
+  const [file, setFile] = useState<File | null>(null);
+  const [previewURL, setPreviewURL] = useState<string | null>(null);
+  const [preSignedUrl, setPreSignedUrl] = useState<string | null>(null);
+  const [fileNameWithExtension, setFileNameWithExtension] = useState<
+    string | null
+  >(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    // console.log("file: ", file);
+    if (file) {
+      setPreviewURL(URL.createObjectURL(file));
+      setFileHandler(file);
+    } else {
+      setPreviewURL(null);
+      setFile(null);
+    }
+  };
+  const setFileHandler = async (newFile: File) => {
+    setFile(newFile);
+    const randomFileName = uuidv4();
+    const extension = newFile.name.split(".").pop();
+    const fullName = `${randomFileName}.${extension}`;
+    setFileNameWithExtension(fullName);
     try {
-      const [imagesData] = await Promise.all([axios.get("/api/getallimages")]);
-
-      setImages(imagesData.data);
+      const response = await axios.get(`/api/getuploadurl?name=${fullName}`);
+      setPreSignedUrl(response.data.url);
     } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setIsLoading(false);
+      console.error("Error Getting pre-signed URL:", error);
+      toast.error("Failed to get upload URL.");
     }
   };
 
-  useEffect(() => {
-    getAllData();
-  }, []);
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -60,8 +75,6 @@ export default function ChainAdd() {
       versusAddress: "",
       standardTokenAddress: "",
     });
-    setChainImage(null);
-    setChainImageId(null);
   };
 
   const handleChainIdBlur = () => {
@@ -87,6 +100,18 @@ export default function ChainAdd() {
     e.preventDefault();
     setIsLoading(true);
     try {
+      if (file && preSignedUrl) {
+        try {
+          await axios.put(preSignedUrl, file, {
+            headers: { "Content-Type": file.type },
+          });
+          setPreviewURL(null);
+          setFile(null);
+        } catch (error) {
+          console.error("Error uploading file:", error);
+          toast.error("Error uploading file.");
+        }
+      }
       await axios.post("/api/savechain", {
         name: formData.name,
         chainId: formData.chainId,
@@ -96,7 +121,7 @@ export default function ChainAdd() {
         isActive: formData.isActive,
         versusAddress: formData.versusAddress,
         standardTokenAddress: formData.standardTokenAddress,
-        image: chainImageId,
+        image: `${process.env.NEXT_PUBLIC_CUSTOM_URL}/${fileNameWithExtension}`,
       });
       toast.success(`Chain added successfully!`);
       // Reset the form after submission
@@ -151,24 +176,24 @@ export default function ChainAdd() {
 
         {/* Image */}
         <label className="block mb-2 font-medium">
-          Image
-          <Dropdown
-            items={images}
-            placeholder="Search and select an image"
-            // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-            onChange={(value: any) => {
-              setChainImage(
-                images.filter((image) => image.id.toString() == value.id)[0].url
-              );
-              setChainImageId(value.id);
-            }}
+          Upload Image
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="border border-gray-300 rounded-lg p-1 w-64"
+            required
           />
-          {chainImage && (
-            <img
-              src={chainImage}
-              alt="Tpken"
-              className="w-24 h-24 mt-2 rounded-lg border border-gray-300"
-            />
+          {file && (
+            <div className="mt-2 text-sm text-gray-600">
+              Selected File: {file.name}
+            </div>
+          )}
+          {previewURL && (
+            <div className="flex space-x-4 mt-6 justify-center">
+              <LightPreview previewURL={previewURL} />
+              <DarkPreview previewURL={previewURL} />
+            </div>
           )}
         </label>
         {/* Explorer URL */}
@@ -216,7 +241,6 @@ export default function ChainAdd() {
             checked={formData.isMainnet}
             onChange={handleChange}
             className="border border-gray-300 rounded"
-            required
           />
           <span>Is Mainnet</span>
         </label>

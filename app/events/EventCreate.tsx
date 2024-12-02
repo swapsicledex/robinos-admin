@@ -11,7 +11,10 @@ import DateTimePicker from "@/components/dashboard/ui/DateTimePicker";
 
 export default function EventCreate() {
   const [eventName, setEventName] = useState("");
-  const [saleEndTime, setSaleEndTime] = useState("");
+  const [saleEndTime, setSaleEndTime] = useState(
+    parseInt((Date.now() / 1000).toString())
+  );
+  const [saleStartTime, setSaleStartTime] = useState(0);
   const [teamAImage, setTeamAImage] = useState<string | null>(null);
   const [teamBImage, setTeamBImage] = useState<string | null>(null);
   const [teamAId, setTeamAId] = useState<string | null>(null);
@@ -76,6 +79,7 @@ export default function EventCreate() {
       const data = {
         code: eventName,
         saleEnd: saleEndTime,
+        saleStart: saleStartTime,
         isFeatured: isFeatured,
         category: category,
         teamA: teamAId,
@@ -103,7 +107,8 @@ export default function EventCreate() {
 
   const handleReset = () => {
     setEventName("");
-    setSaleEndTime("");
+    setSaleEndTime(0);
+    setSaleStartTime(0);
     setTeamAImage(null);
     setTeamBImage(null);
     setCategory("");
@@ -115,8 +120,11 @@ export default function EventCreate() {
     setTournament(null);
   };
 
-  const handleDateTimeChange = (dateTime: Date) => {
-    setSaleEndTime((dateTime.getTime() / 1000).toString());
+  const handleEndTimeChange = (dateTime: Date) => {
+    setSaleEndTime(dateTime.getTime() / 1000);
+  };
+  const handleStartTimeChange = (dateTime: Date) => {
+    setSaleStartTime(dateTime.getTime() / 1000);
   };
 
   const handleConditionChange = (index: number, value: string) => {
@@ -176,14 +184,33 @@ export default function EventCreate() {
             required
           />
         </div>
+        <fieldset className="mb-6 border border-gray-200 rounded-lg p-4 mt-4">
+          <label className="block font-medium mb-2">
+            Sale Start Time (Unix Timestamp)
+          </label>
+          <DateTimePicker onDateTimeChange={handleStartTimeChange} />
+          <input
+            type="text"
+            value={saleStartTime}
+            onChange={(e) => setEventName(e.target.value)}
+            className="border border-gray-300 rounded-lg p-2 w-full"
+            required
+          />
+        </fieldset>
 
-        <div className="mb-6">
+        <fieldset className="mb-6 border border-gray-200 rounded-lg p-4 mt-4">
           <label className="block font-medium mb-2">
             Sale End Time (Unix Timestamp)
           </label>
-          <DateTimePicker onDateTimeChange={handleDateTimeChange} />
-          <p>Selected Timestamp: {saleEndTime}</p>
-        </div>
+          <DateTimePicker onDateTimeChange={handleEndTimeChange} />
+          <input
+            type="text"
+            value={saleEndTime}
+            onChange={(e) => setEventName(e.target.value)}
+            className="border border-gray-300 rounded-lg p-2 w-full"
+            required
+          />
+        </fieldset>
 
         <div className="mt-4 mb-2">
           <label className="block font-medium mb-1">
@@ -252,36 +279,7 @@ export default function EventCreate() {
               }}
             />
           </label>
-          {showHandicap && (
-            <div className="flex flex-row justify-between">
-              <div>
-                <label htmlFor="handicapA" className="block font-medium mb-1">
-                  Handicap Team A
-                </label>
-                <input
-                  type="text"
-                  id="handicapA"
-                  name="handicapA"
-                  value={handicapA ?? ""}
-                  onChange={(e) => setHandicapA(e.target.value)}
-                  className="border border-gray-300 rounded-lg p-2"
-                />
-              </div>
-              <div>
-                <label htmlFor="handicapB" className="block font-medium mb-1">
-                  Handicap Team B
-                </label>
-                <input
-                  type="text"
-                  id="handicapB"
-                  name="handicapB"
-                  value={handicapB ?? ""}
-                  onChange={(e) => setHandicapB(e.target.value)}
-                  className="border border-gray-300 rounded-lg p-2"
-                />
-              </div>
-            </div>
-          )}
+
           <label className="block mb-4 font-medium">
             Tournament
             <Dropdown
@@ -371,6 +369,23 @@ export default function EventCreate() {
               />
             )}
           </label>
+          {showHandicap && (
+            <div className="flex flex-row justify-between">
+              <div>
+                <label htmlFor="handicapA" className="block font-medium mb-1">
+                  Handicap Team A
+                </label>
+                <input
+                  type="text"
+                  id="handicapA"
+                  name="handicapA"
+                  value={handicapA ?? ""}
+                  onChange={(e) => setHandicapA(e.target.value)}
+                  className="border border-gray-300 rounded-lg p-2"
+                />
+              </div>
+            </div>
+          )}
         </fieldset>
         {/* Team B Section */}
         <fieldset className="mb-6 border border-gray-200 rounded-lg p-4">
@@ -398,6 +413,23 @@ export default function EventCreate() {
               />
             )}
           </label>
+          {showHandicap && (
+            <div className="flex flex-row justify-between">
+              <div>
+                <label htmlFor="handicapB" className="block font-medium mb-1">
+                  Handicap Team B
+                </label>
+                <input
+                  type="text"
+                  id="handicapB"
+                  name="handicapB"
+                  value={handicapB ?? ""}
+                  onChange={(e) => setHandicapB(e.target.value)}
+                  className="border border-gray-300 rounded-lg p-2"
+                />
+              </div>
+            </div>
+          )}
         </fieldset>
 
         <button

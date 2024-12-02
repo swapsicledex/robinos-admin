@@ -7,6 +7,7 @@ export async function POST(request: NextRequest) {
   const event: NewEvent = {
     code: body.code,
     saleEnd: body.saleEnd,
+    saleStart: body.saleStart,
     isFeatured: body.isFeatured,
     category: body.category,
     teamA: body.teamA,

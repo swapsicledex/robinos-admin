@@ -1,11 +1,14 @@
+import DarkPreview from "@/components/dashboard/ui/DarkPreview";
 import Dropdown from "@/components/dashboard/ui/Dropdown";
-import { Chain, Player } from "@/db/schema";
+import LightPreview from "@/components/dashboard/ui/LightPreview";
+import { Chain } from "@/db/schema";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { v4 as uuidv4 } from "uuid";
 
 export default function TokenAdd() {
-    const [name, setName] = useState("");
+  const [name, setName] = useState("");
   const [symbol, setSymbol] = useState("");
   const [address, setAddress] = useState("");
   const [chainId, setChainId] = useState<number | null>(null);
@@ -13,19 +16,45 @@ export default function TokenAdd() {
   const [isLoading, setIsLoading] = useState(false);
 
   const [chains, setChains] = useState<Chain[]>([]);
-  const [images, setImages] = useState<Player[]>([]);
-  const [tokenImage, setTokenImage] = useState<string | null>(null);
-  const [tokenImageId, setTokenImageId] = useState<string | null>(null);
+
+  const [file, setFile] = useState<File | null>(null);
+  const [previewURL, setPreviewURL] = useState<string | null>(null);
+  const [preSignedUrl, setPreSignedUrl] = useState<string | null>(null);
+  const [fileNameWithExtension, setFileNameWithExtension] = useState<
+  string | null
+>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    // console.log("file: ", file);
+    if (file) {
+      setPreviewURL(URL.createObjectURL(file));
+      setFileHandler(file);
+    } else {
+      setPreviewURL(null);
+      setFile(null);
+    }
+  };
+  const setFileHandler = async (newFile: File) => {
+    setFile(newFile);
+    const randomFileName = uuidv4();
+    const extension = newFile.name.split(".").pop();
+    const fullName = `${randomFileName}.${extension}`;
+    setFileNameWithExtension(fullName);
+    try {
+      const response = await axios.get(`/api/getuploadurl?name=${fullName}`);
+      setPreSignedUrl(response.data.url);
+    } catch (error) {
+      console.error("Error Getting pre-signed URL:", error);
+      toast.error("Failed to get upload URL.");
+    }
+  };
 
   const getAllData = async () => {
     try {
-      const [chainRes, playerRes] = await Promise.all([
-        axios.get("/api/getallchains"),
-        axios.get("/api/getallimages"),
-      ]);
+      const [chainRes] = await Promise.all([axios.get("/api/getallchains")]);
 
       setChains(chainRes.data);
-      setImages(playerRes.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -39,13 +68,25 @@ export default function TokenAdd() {
     e.preventDefault();
     setIsLoading(true);
     try {
+      if (file && preSignedUrl) {
+        try {
+          await axios.put(preSignedUrl, file, {
+            headers: { "Content-Type": file.type },
+          });
+          setPreviewURL(null);
+          setFile(null);
+        } catch (error) {
+          console.error("Error uploading file:", error);
+          toast.error("Error uploading file.");
+        }
+      }
       await axios.post("/api/savetoken", {
         address: address,
         symbol: symbol,
-        name:name,
+        name: name,
         chainId: chainId,
         decimal: decimal,
-        image: tokenImageId,
+        image:  `${process.env.NEXT_PUBLIC_CUSTOM_URL}/${fileNameWithExtension}`,
       });
       toast.success(`Token added successfully!`);
       // Reset the form after submission
@@ -138,24 +179,24 @@ export default function TokenAdd() {
 
         {/* Image */}
         <label className="block mb-2 font-medium">
-          Image
-          <Dropdown
-            items={images}
-            placeholder="Search and select an image"
-            // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-            onChange={(value: any) => {
-              setTokenImage(
-                images.filter((image) => image.id.toString() == value.id)[0].url
-              );
-              setTokenImageId(value.id);
-            }}
+          Upload Image
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="border border-gray-300 rounded-lg p-1 w-64"
+            required
           />
-          {tokenImage && (
-            <img
-              src={tokenImage}
-              alt="Tpken"
-              className="w-24 h-24 mt-2 rounded-lg border border-gray-300"
-            />
+          {file && (
+            <div className="mt-2 text-sm text-gray-600">
+              Selected File: {file.name}
+            </div>
+          )}
+          {previewURL && (
+            <div className="flex space-x-4 mt-6 justify-center">
+              <LightPreview previewURL={previewURL} />
+              <DarkPreview previewURL={previewURL} />
+            </div>
           )}
         </label>
 

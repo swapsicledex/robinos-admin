@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 
@@ -22,6 +22,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedItems, setSelectedItems] = React.useState<DropdownItem[]>([]);
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleSelect = (item: DropdownItem) => {
     if (allowMultiple) {
@@ -59,12 +60,22 @@ const Dropdown: React.FC<DropdownProps> = ({
 
       <DropdownMenu.Portal>
         <DropdownMenu.Content
-          className="w-64 p-2 bg-white border rounded-md shadow-lg"
+          className="w-64 p-2 bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto"
           sideOffset={4}
+          onCloseAutoFocus={(event) => {
+            // Prevent the dropdown from closing if the search input retains focus
+            if (
+              searchInputRef.current &&
+              searchInputRef.current.contains(document.activeElement)
+            ) {
+              event.preventDefault();
+            }
+          }}
         >
           {/* Search Bar */}
           <div className="mb-2">
             <input
+              ref={searchInputRef}
               type="text"
               placeholder="Search..."
               value={searchQuery}
