@@ -13,6 +13,7 @@ import {
 export const category = pgTable("category", {
   id: serial("id").primaryKey(),
   category: varchar("category", { length: 64 }).notNull(),
+  imageUrl: varchar("image_url", { length: 127 }),
 });
 
 // Players Table
@@ -90,6 +91,7 @@ export const tournaments = pgTable("tournaments", {
   id: serial("id").primaryKey(),
   category: integer("category").references(() => category.id), // Foreign key to category table
   name: varchar("name", { length: 63 }).notNull(),
+  imageUrl: varchar("image_url", { length: 127 }),
 });
 
 export type Player = typeof players.$inferSelect;
