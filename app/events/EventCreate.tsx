@@ -14,7 +14,9 @@ export default function EventCreate() {
   const [saleEndTime, setSaleEndTime] = useState(
     parseInt((Date.now() / 1000).toString())
   );
-  const [saleStartTime, setSaleStartTime] = useState(0);
+  const [saleStartTime, setSaleStartTime] = useState(
+    parseInt((Date.now() / 1000).toString())
+  );
   const [teamAImage, setTeamAImage] = useState<string | null>(null);
   const [teamBImage, setTeamBImage] = useState<string | null>(null);
   const [teamAId, setTeamAId] = useState<string | null>(null);
@@ -107,8 +109,8 @@ export default function EventCreate() {
 
   const handleReset = () => {
     setEventName("");
-    setSaleEndTime(0);
-    setSaleStartTime(0);
+    setSaleEndTime(parseInt((Date.now() / 1000).toString()));
+    setSaleStartTime(parseInt((Date.now() / 1000).toString()));
     setTeamAImage(null);
     setTeamBImage(null);
     setCategory("");
@@ -192,9 +194,9 @@ export default function EventCreate() {
           <input
             type="text"
             value={saleStartTime}
-            onChange={(e) => setEventName(e.target.value)}
+            onChange={(e) => setSaleStartTime(Number(e.target.value))}
             className="border border-gray-300 rounded-lg p-2 w-full"
-            required
+            disabled
           />
         </fieldset>
 
@@ -206,9 +208,9 @@ export default function EventCreate() {
           <input
             type="text"
             value={saleEndTime}
-            onChange={(e) => setEventName(e.target.value)}
+            onChange={(e) => setSaleEndTime(Number(e.target.value))}
             className="border border-gray-300 rounded-lg p-2 w-full"
-            required
+            disabled
           />
         </fieldset>
 
@@ -259,6 +261,65 @@ export default function EventCreate() {
           ))}
         </fieldset>
 
+        {/* Dynamic Chain-Token Section */}
+        <fieldset className="mb-6 border border-gray-200 rounded-lg p-4">
+          <legend className="text-lg font-medium text-gray-700 px-2">
+            Chains and Tokens
+          </legend>
+
+          {chainsTokens.map((chainToken, index) => (
+            <div key={index} className="flex items-center gap-4 mb-4">
+              <div className="flex-1">
+                <Dropdown
+                  items={chains.map((chain) => ({
+                    id: chain.chainId,
+                    name: chain.name,
+                  }))}
+                  placeholder="Select a chain"
+                  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+                  onChange={(value: any) => handleChainChange(index, value.id)}
+                />
+              </div>
+              {chainToken.chainId ? (
+                <div className="flex-1">
+                  <Dropdown
+                    items={tokens
+                      .filter(
+                        (token) =>
+                          token.chainId.toString() == chainToken.chainId
+                      )
+                      .map((token) => ({
+                        id: token.id,
+                        name: token.symbol,
+                      }))}
+                    placeholder="Select a token"
+                    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+                    onChange={(value: any) =>
+                      handleTokenChange(index, value.id)
+                    }
+                  />
+                </div>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => handleRemoveChainTokenRow(index)}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                title="Remove Chain-Token Pair"
+              >
+                -
+              </button>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={handleAddChainTokenRow}
+            className="bg-green-500 text-white px-4 py-2 rounded-lg"
+          >
+            Add Chain-Token
+          </button>
+        </fieldset>
+
         <fieldset className="mb-6 border border-gray-200 rounded-lg p-4 mt-4">
           <label className="block mb-4 font-medium">
             Category
@@ -283,7 +344,9 @@ export default function EventCreate() {
           <label className="block mb-4 font-medium">
             Tournament
             <Dropdown
-              items={tournaments}
+              items={tournaments.filter(
+                (item) => item?.category?.toString() == category
+              )}
               placeholder="Search and select a tournament"
               // eslint-disable-next-line  @typescript-eslint/no-explicit-any
               onChange={(value: any) => {
@@ -293,62 +356,14 @@ export default function EventCreate() {
           </label>
         </fieldset>
 
-        {/* Dynamic Chain-Token Section */}
-        <fieldset className="mb-6 border border-gray-200 rounded-lg p-4">
-          <legend className="text-lg font-medium text-gray-700 px-2">
-            Chains and Tokens
-          </legend>
-
-          {chainsTokens.map((chainToken, index) => (
-            <div key={index} className="flex items-center gap-4 mb-4">
-              <div className="flex-1">
-                <Dropdown
-                  items={chains.map((chain) => ({
-                    id: chain.chainId,
-                    name: chain.name,
-                  }))}
-                  placeholder="Select a chain"
-                  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-                  onChange={(value: any) => handleChainChange(index, value.id)}
-                />
-              </div>
-              <div className="flex-1">
-                <Dropdown
-                  items={tokens.map((token) => ({
-                    id: token.id,
-                    name: token.symbol,
-                  }))}
-                  placeholder="Select a token"
-                  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-                  onChange={(value: any) => handleTokenChange(index, value.id)}
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => handleRemoveChainTokenRow(index)}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg"
-                title="Remove Chain-Token Pair"
-              >
-                -
-              </button>
-            </div>
-          ))}
-
-          <button
-            type="button"
-            onClick={handleAddChainTokenRow}
-            className="bg-green-500 text-white px-4 py-2 rounded-lg"
-          >
-            Add Chain-Token
-          </button>
-        </fieldset>
-
         {/* Team ASection */}
         <fieldset className="mb-6 border border-gray-200 rounded-lg p-4">
           <label className="block mb-4 font-medium">
             Team A
             <Dropdown
-              items={images}
+              items={images.filter(
+                (item) => item.category.toString() == category
+              )}
               placeholder="Search and select an image"
               // eslint-disable-next-line  @typescript-eslint/no-explicit-any
               onChange={(value: any) => {
@@ -392,7 +407,9 @@ export default function EventCreate() {
           <label className="block mb-4 font-medium">
             Team B
             <Dropdown
-              items={images}
+              items={images.filter(
+                (item) => item.category.toString() == category
+              )}
               placeholder="Search and select an image"
               // eslint-disable-next-line  @typescript-eslint/no-explicit-any
               onChange={(value: any) => {
