@@ -1,60 +1,313 @@
-import { Event } from "@/db/schema";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+"use client";
 
-export default function EventView() {
-  const [allEvents, setAllEvents] = useState<Event[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const getAllEventsData = async () => {
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import Dropdown from "@/components/dashboard/ui/Dropdown";
+import DateTimePicker from "@/components/dashboard/ui/DateTimePicker";
+import { Category, Tournament } from "@/db/schema";
+
+type FormData = {
+  id: number;
+  code: string;
+  chainId: number;
+  isFeatured: boolean;
+  saleStart: number | null;
+  saleEnd: number;
+  category: number;
+  tournament: number | null;
+  conditions: string[];
+};
+
+export default function EventList() {
+  const [events, setEvents] = useState<FormData[]>([]);
+  const [expandedRow, setExpandedRow] = useState<number | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const fetchEvents = async () => {
     setIsLoading(true);
-    const response = await axios.get("/api/getallevents");
-    setIsLoading(false);
-    setAllEvents(response.data);
+    try {
+      const { data } = await axios.get("/api/getallevents");
+      setEvents(data);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      toast.error("Failed to fetch events.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchAuxiliaryData = async () => {
+    try {
+      const [categoriesData, tournamentsData] = await Promise.all([
+        axios.get("/api/getallcategories"),
+        axios.get("/api/getalltournaments"),
+      ]);
+      setCategories(categoriesData.data);
+      setTournaments(tournamentsData.data);
+    } catch (error) {
+      console.error("Error fetching auxiliary data:", error);
+    }
+  };
+
+  const updateEvent = async (updatedData: FormData) => {
+    try {
+      await axios.put("/api/updateevent", updatedData);
+      toast.success("Event updated successfully!");
+      fetchEvents();
+    } catch (error) {
+      console.error("Error updating event:", error);
+      toast.error("Failed to update event.");
+    }
   };
 
   useEffect(() => {
-    getAllEventsData();
+    fetchEvents();
+    fetchAuxiliaryData();
   }, []);
 
   return (
-    <>
-      {isLoading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="loader border-t-blue-600 border-4 rounded-full w-16 h-16 animate-spin"></div>
-        </div>
-      )}
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <h2 className="text-2xl font-semibold mb-4">All Events</h2>
-
-        {allEvents.length === 0 ? (
-          <p className="text-gray-600">No events available.</p>
-        ) : (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border-b py-2 px-4">Event Name</th>
-                <th className="border-b py-2 px-4">Sale End Time</th>
-                <th className="border-b py-2 px-4">Chain Id</th>
-              </tr>
-            </thead>
-            <tbody>
-              {allEvents.map((event) => (
-                <tr key={event.id} className="hover:bg-gray-50">
-                  <td className="border-b py-2 px-4">{event.code}</td>
-                  <td className="border-b py-2 px-4">
-                    {new Date(
-                      parseInt(event?.saleEnd?.toString() ?? "") * 1000
-                    ).toLocaleString()}
+    <div className="max-w-5xl mx-auto mt-10">
+      <h2 className="text-2xl font-semibold mb-6">All Events</h2>
+      {isLoading ? (
+        <div className="text-center">Loading...</div>
+      ) : (
+        <table className="table-auto w-full border-collapse border border-gray-300">
+          <thead>
+            <tr>
+              <th className="border border-gray-300 p-2">Event Name</th>
+              <th className="border border-gray-300 p-2">Category</th>
+              <th className="border border-gray-300 p-2">Tournament</th>
+              <th className="border border-gray-300 p-2">Chain Id</th>
+              <th className="border border-gray-300 p-2">Sale End</th>
+              <th className="border border-gray-300 p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {events.map((event, index) => (
+              <>
+                <tr
+                  key={event.id}
+                  className="cursor-pointer"
+                  onClick={() =>
+                    setExpandedRow(expandedRow === index ? null : index)
+                  }
+                >
+                  <td className="border border-gray-300 p-2">{event.code}</td>
+                  <td className="border border-gray-300 p-2">
+                    {
+                      categories.find((cat) => cat.id === event.category)
+                        ?.category
+                    }
                   </td>
-                  <td className="border-b py-2 px-4">
+                  <td className="border border-gray-300 p-2">
+                    {
+                      tournaments.find((tour) => tour.id === event.tournament)
+                        ?.name
+                    }
+                  </td>
+                  <td className="border border-gray-300 p-2">
                     {event.chainId}
                   </td>
+                  <td className="border border-gray-300 p-2">
+                    {new Date(event.saleEnd * 1000).toLocaleString()}
+                  </td>
+                  <td className="border border-gray-300 p-2 text-center">
+                    {expandedRow === index ? "-" : "+"}
+                  </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+                {expandedRow === index && (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="border border-gray-300 p-4 bg-gray-50"
+                    >
+                      <EditEventForm
+                        event={event}
+                        categories={categories}
+                        tournaments={tournaments}
+                        onUpdate={updateEvent}
+                      />
+                    </td>
+                  </tr>
+                )}
+              </>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
+function EditEventForm({
+  event,
+  categories,
+  tournaments,
+  onUpdate,
+}: {
+  event: FormData;
+  categories: Category[];
+  tournaments: Tournament[];
+  onUpdate: (updatedData: FormData) => void;
+}) {
+  const [formData, setFormData] = useState<FormData>({
+    ...event,
+    saleStart: event.saleStart || null,
+  });
+
+  const handleInputChange = (
+    field: string,
+    value: string | number | boolean
+  ) => {
+    setFormData({ ...formData, [field]: value });
+  };
+
+  const handleConditionChange = (index: number, value: string) => {
+    const updatedConditions = [...formData.conditions];
+    updatedConditions[index] = value;
+    setFormData({ ...formData, conditions: updatedConditions });
+  };
+
+  const addCondition = () => {
+    setFormData({ ...formData, conditions: [...formData.conditions, ""] });
+  };
+
+  const removeCondition = (index: number) => {
+    const updatedConditions = formData.conditions.filter((_, i) => i !== index);
+    setFormData({ ...formData, conditions: updatedConditions });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onUpdate(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <label className="block font-medium">Event Code</label>
+        <input
+          type="text"
+          value={formData.code}
+          onChange={(e) => handleInputChange("code", e.target.value)}
+          className="border border-gray-300 rounded-lg p-3 w-full"
+        />
       </div>
-    </>
+
+      <div className="space-y-2">
+        <label className="block font-medium">Sale Start Time</label>
+        <DateTimePicker
+          initialDateTime={
+            formData.saleStart ? new Date(formData.saleStart * 1000) : undefined
+          }
+          onDateTimeChange={(date) =>
+            handleInputChange("saleStart", Math.floor(date.getTime() / 1000))
+          }
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="block font-medium">Sale End Time</label>
+        <DateTimePicker
+          initialDateTime={new Date(formData.saleEnd * 1000)}
+          onDateTimeChange={(date) =>
+            handleInputChange("saleEnd", Math.floor(date.getTime() / 1000))
+          }
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="block font-medium">Category</label>
+        <Dropdown
+          items={categories.map((cat) => ({
+            id: cat.id,
+            name: cat.category,
+          }))}
+          initialSelectedItems={
+            categories
+              .map((cat) => ({
+                id: cat.id,
+                name: cat.category,
+              }))
+              .find((cat) => cat.id === formData.category) || undefined
+          }
+          placeholder="Select a category"
+          // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+          onChange={(value: any) => handleInputChange("category", value.id)}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="block font-medium">Tournament</label>
+        <Dropdown
+          items={tournaments
+            .filter((tour) => tour.category === formData.category)
+            .map((tour) => ({
+              id: tour.id,
+              name: tour.name,
+            }))}
+          initialSelectedItems={
+            tournaments.find((tour) => tour.id === formData.tournament) ||
+            undefined
+          }
+          placeholder="Select a tournament"
+          // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+          onChange={(selectedItems: any) =>
+            handleInputChange("tournament", selectedItems.id)
+          }
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={formData.isFeatured}
+            onChange={(e) => handleInputChange("isFeatured", e.target.checked)}
+          />
+          <span className="font-medium">Featured Event</span>
+        </label>
+      </div>
+
+      <fieldset className="border border-gray-200 p-4 rounded-lg space-y-4">
+        <legend className="font-medium text-lg">Conditions</legend>
+        {formData.conditions.map((condition, index) => (
+          <div key={index} className="flex items-center space-x-2">
+            <input
+              type="text"
+              value={condition}
+              onChange={(e) => handleConditionChange(index, e.target.value)}
+              className="border border-gray-300 rounded-lg p-3 flex-1"
+            />
+            <button
+              type="button"
+              onClick={addCondition}
+              className="bg-green-500 text-white p-2 rounded-lg"
+            >
+              +
+            </button>
+            {formData.conditions.length > 1 && (
+              <button
+                type="button"
+                onClick={() => removeCondition(index)}
+                className="bg-red-500 text-white p-2 rounded-lg"
+              >
+                -
+              </button>
+            )}
+          </div>
+        ))}
+      </fieldset>
+
+      <button
+        type="submit"
+        className="bg-blue-600 text-white px-4 py-3 rounded-lg w-full"
+      >
+        Save Changes
+      </button>
+    </form>
   );
 }

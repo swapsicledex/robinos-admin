@@ -12,20 +12,34 @@ export type DropdownProps = {
   items: DropdownItem[];
   placeholder?: string;
   allowMultiple?: boolean;
-  onChange: (selectedItems: DropdownItem[] | DropdownItem | null) => void;
+  initialSelectedItems?: DropdownItem | DropdownItem[]; // Added initial selection
+  onChange: (selectedItems: DropdownItem[] | DropdownItem | null) => void; // Updated type to allow null
 };
 
 const Dropdown: React.FC<DropdownProps> = ({
   items,
+  placeholder = "Select...",
   allowMultiple = false,
+  initialSelectedItems,
   onChange,
 }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [selectedItems, setSelectedItems] = React.useState<DropdownItem[]>([]);
+  const [selectedItems, setSelectedItems] = React.useState<DropdownItem[]>(
+    Array.isArray(initialSelectedItems)
+      ? initialSelectedItems
+      : initialSelectedItems
+      ? [initialSelectedItems]
+      : []
+  );
+
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
-  const handleSelect = (item: DropdownItem) => {
-    if (allowMultiple) {
+  const handleSelect = (item: DropdownItem | null) => {
+    if (item === null) {
+      // Clear selection
+      setSelectedItems([]);
+      onChange(null);
+    } else if (allowMultiple) {
       const alreadySelected = selectedItems.some(
         (selected) => selected.id === item.id
       );
@@ -51,8 +65,8 @@ const Dropdown: React.FC<DropdownProps> = ({
         <button className="flex items-center px-4 py-2 my-2 bg-white border rounded-md shadow-sm focus:outline-none hover:bg-gray-50">
           <span>
             {allowMultiple
-              ? selectedItems.map((item) => item.name).join(", ") || "Select..."
-              : selectedItems[0]?.name || "Select..."}
+              ? selectedItems.map((item) => item.name).join(", ") || placeholder
+              : selectedItems[0]?.name || placeholder}
           </span>
           <ChevronDownIcon className="w-5 h-5 ml-2 text-gray-500" />
         </button>
@@ -63,7 +77,6 @@ const Dropdown: React.FC<DropdownProps> = ({
           className="w-64 p-2 bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto"
           sideOffset={4}
           onCloseAutoFocus={(event) => {
-            // Prevent the dropdown from closing if the search input retains focus
             if (
               searchInputRef.current &&
               searchInputRef.current.contains(document.activeElement)
@@ -83,6 +96,14 @@ const Dropdown: React.FC<DropdownProps> = ({
               className="w-full px-3 py-2 border rounded-md focus:ring focus:ring-blue-300"
             />
           </div>
+
+          {/* "None" Option */}
+          <DropdownMenu.Item
+            className="flex items-center px-3 py-2 rounded-md hover:bg-gray-100 focus:outline-none"
+            onSelect={() => handleSelect(null)}
+          >
+            <span className="text-sm font-medium text-gray-500">None</span>
+          </DropdownMenu.Item>
 
           {/* List Items */}
           {filteredItems.length ? (
