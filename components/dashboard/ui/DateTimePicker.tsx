@@ -8,15 +8,22 @@ type DateTime = {
   minute: string;
   second: string;
 };
+type DateTimePickerProps = {
+  initialDateTime?: Date;
+  onDateTimeChange: (dateTime: Date) => void;
+};
 
-const DateTimePicker: React.FC<{ onDateTimeChange: (dateTime: Date) => void }> = ({ onDateTimeChange }) => {
+const DateTimePicker: React.FC<DateTimePickerProps> = ({
+  initialDateTime = new Date(),
+  onDateTimeChange,
+}) => {
   const [dateTime, setDateTime] = useState<DateTime>({
-    year: "",
-    month: "",
-    day: "",
-    hour: "",
-    minute: "",
-    second: "",
+    year: String(initialDateTime.getFullYear()),
+    month: String(initialDateTime.getMonth() + 1).padStart(2, "0"),
+    day: String(initialDateTime.getDate()).padStart(2, "0"),
+    hour: String(initialDateTime.getHours()).padStart(2, "0"),
+    minute: String(initialDateTime.getMinutes()).padStart(2, "0"),
+    second: String(initialDateTime.getSeconds()).padStart(2, "0"),
   });
 
   useEffect(() => {
