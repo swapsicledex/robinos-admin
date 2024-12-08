@@ -1,7 +1,6 @@
-import Dropdown from "@/components/dashboard/ui/Dropdown";
-import { Category } from "@/db/schema";
+import Dropdown, { DropdownItem } from "@/components/dashboard/ui/Dropdown";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 import LightPreview from "@/components/dashboard/ui/LightPreview";
@@ -11,7 +10,10 @@ export default function TournamentCreate() {
   const [tournament, setTournament] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [category, setCategory] = useState("");
-  const [categories, setCategories] = useState<Category[]>([]);
+  // const [categories, setCategories] = useState<Category[]>([]);
+
+  const [selectedCategoryItem, setSelectedCategoryItem] =
+    useState<DropdownItem | null>(null);
 
   const [file, setFile] = useState<File | null>(null);
   const [previewURL, setPreviewURL] = useState<string | null>(null);
@@ -46,21 +48,21 @@ export default function TournamentCreate() {
     }
   };
 
-  const getAllData = async () => {
-    setIsLoading(true);
-    try {
-      const categoriesData = await axios.get("/api/getallcategories");
-      setCategories(categoriesData.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // const getAllData = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const categoriesData = await axios.get("/api/getallcategories");
+  //     setCategories(categoriesData.data);
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
-  useEffect(() => {
-    getAllData();
-  }, []);
+  // useEffect(() => {
+  //   getAllData();
+  // }, []);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,14 +126,13 @@ export default function TournamentCreate() {
         <label className="block mb-4 font-medium">
           Category
           <Dropdown
-            items={categories.map((cat) => ({
-              id: cat.id,
-              name: cat.category,
-            }))}
+            apiEndpoint="/api/getallcategories?"
+            value={selectedCategoryItem}
             placeholder="Search and select a category"
             // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-            onChange={(value: any) => {
-              setCategory(value.id);
+            onChange={(option: any) => {
+              setSelectedCategoryItem(option);
+              setCategory(option?.value);
             }}
           />
         </label>
@@ -143,7 +144,6 @@ export default function TournamentCreate() {
             accept="image/*"
             onChange={handleFileChange}
             className="border border-gray-300 rounded-lg p-1 w-64"
-            required
           />
           {file && (
             <div className="mt-2 text-sm text-gray-600">

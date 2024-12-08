@@ -8,6 +8,7 @@ export async function POST(request: NextRequest) {
     name: body.name,
     symbol: body.symbol,
     category: body.category,
+    tournament: body.tournament,
     url: `${process.env.NEXT_PUBLIC_CUSTOM_URL}/${body.imageName}`,
   };
   console.log(

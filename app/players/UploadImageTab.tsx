@@ -5,8 +5,8 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import LightPreview from "@/components/dashboard/ui/LightPreview";
 import DarkPreview from "@/components/dashboard/ui/DarkPreview";
-import { Category, Player } from "@/db/schema";
-import Dropdown from "@/components/dashboard/ui/Dropdown";
+import { Player } from "@/db/schema";
+import Dropdown, { DropdownItem } from "@/components/dashboard/ui/Dropdown";
 
 export default function UploadImageTab({
   editMode,
@@ -27,20 +27,26 @@ export default function UploadImageTab({
   const [isEdited, setIsEdited] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [allCategories, setAllCategories] = useState<Category[]>([]);
+  // const [allCategories, setAllCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [symbol, setSymbol] = useState("");
+  const [tournament, setTournament] = useState<number | null>(null);
+  const [selectedTournamentItem, setSelectedTournamentItem] =
+    useState<DropdownItem | null>(null);
 
-  const getAllCategoriesData = async () => {
-    setIsLoading(true);
-    const response = await axios.get("/api/getallcategories");
-    setIsLoading(false);
-    setAllCategories(response.data);
-  };
+  const [selectedCategoryItem, setSelectedCategoryItem] =
+    useState<DropdownItem | null>(null);
+
+  // const getAllCategoriesData = async () => {
+  //   setIsLoading(true);
+  //   const response = await axios.get("/api/getallcategories");
+  //   setIsLoading(false);
+  //   setAllCategories(response.data);
+  // };
 
   useEffect(() => {
-    getAllCategoriesData();
-    if (editMode&&editItem) {
+    // getAllCategoriesData();
+    if (editMode && editItem) {
       setIsLoading(true);
       try {
         setPreviewURL(editItem.url);
@@ -48,6 +54,7 @@ export default function UploadImageTab({
         uploadFileFromUrl(editItem.url, editItem.name);
         setSymbol(editItem.symbol);
         setSelectedCategory(editItem.category);
+        setTournament(editItem.tournament);
       } catch {}
       setIsLoading(false);
     }
@@ -104,6 +111,7 @@ export default function UploadImageTab({
             imageName: fileNameWithExtension,
             symbol: symbol,
             category: selectedCategory,
+            tournament: tournament,
           });
           toast.success(`File uploaded successfully!`);
         }
@@ -112,6 +120,9 @@ export default function UploadImageTab({
         setFile(null);
         setFileName("");
         setSelectedCategory(null);
+        setTournament(null);
+        setSelectedCategoryItem(null);
+        setSelectedTournamentItem(null);
         setSymbol("");
       } catch (error) {
         console.error("Error uploading file:", error);
@@ -187,14 +198,28 @@ export default function UploadImageTab({
         <label className="block mb-2 font-medium">
           Category
           <Dropdown
-            items={allCategories.map((category) => ({
-              id: category.id,
-              name: category.category,
-            }))}
+            apiEndpoint="/api/getallcategories?"
+            value={selectedCategoryItem}
             placeholder="Choose a category"
             // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-            onChange={(value: any) => {
-              setSelectedCategory(value.id);
+            onChange={(option: any) => {
+              setSelectedCategoryItem(option);
+              setSelectedCategory(option?.value);
+            }}
+          />
+        </label>
+        <label className="block mb-4 font-medium">
+          Tournament
+          <Dropdown
+            apiEndpoint={`/api/getalltournaments?categoryId=${Number(
+              selectedCategory
+            )}`}
+            value={selectedTournamentItem}
+            placeholder="Search and select a tournament"
+            // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+            onChange={(option: any) => {
+              setSelectedTournamentItem(option);
+              setTournament(option.value);
             }}
           />
         </label>

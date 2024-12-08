@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const offset = (parsedPage - 1) * parsedLimit;
 
     const conditions = [
-      search ? sql`${category.category} ILIKE ${`%${search}%`}` : undefined,
+      search ? sql`${category.name} ILIKE ${`%${search}%`}` : undefined,
     ].filter(Boolean); // Filter out undefined values directly in the array
 
     try {

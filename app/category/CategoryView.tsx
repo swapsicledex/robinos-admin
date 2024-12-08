@@ -36,7 +36,7 @@ export default function CategoryView() {
             {allCategories.length > 0 ? (
               allCategories.map((category) => (
                 <tr key={category.id} className="border-b hover:bg-gray-50">
-                  <td className="p-4 text-gray-800">{category.category}</td>
+                  <td className="p-4 text-gray-800">{category.name}</td>
                 </tr>
               ))
             ) : (

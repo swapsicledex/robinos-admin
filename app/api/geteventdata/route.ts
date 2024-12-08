@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
             conditions: events.conditions,
             handicapTeamA: events.handicapTeamA,
             handicapTeamB: events.handicapTeamB,
-            category: category.category,
+            category: category.name,
             tournament: tournaments.name,
             teamA: {
               name: sql`CASE 
