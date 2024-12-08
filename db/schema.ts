@@ -12,7 +12,7 @@ import {
 // Category Table
 export const category = pgTable("category", {
   id: serial("id").primaryKey(),
-  category: varchar("category", { length: 64 }).notNull(),
+  name: varchar("name", { length: 64 }).notNull(),
   imageUrl: varchar("image_url", { length: 127 }),
 });
 
@@ -27,6 +27,7 @@ export const players = pgTable("players", {
     .notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  tournament: integer("tournament").references(() => tournaments.id),
 });
 
 // Chains Table

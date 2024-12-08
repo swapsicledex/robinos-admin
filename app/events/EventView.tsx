@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import Dropdown from "@/components/dashboard/ui/Dropdown";
+import Dropdown, { DropdownItem } from "@/components/dashboard/ui/Dropdown";
 import DateTimePicker from "@/components/dashboard/ui/DateTimePicker";
 import { Category, Tournament } from "@/db/schema";
 
@@ -85,7 +85,7 @@ export default function EventList() {
               <th className="border border-gray-300 p-2">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody key="body">
             {events.map((event, index) => (
               <>
                 <tr
@@ -97,10 +97,7 @@ export default function EventList() {
                 >
                   <td className="border border-gray-300 p-2">{event.code}</td>
                   <td className="border border-gray-300 p-2">
-                    {
-                      categories.find((cat) => cat.id === event.category)
-                        ?.category
-                    }
+                    {categories.find((cat) => cat.id === event.category)?.name}
                   </td>
                   <td className="border border-gray-300 p-2">
                     {
@@ -144,8 +141,6 @@ export default function EventList() {
 
 function EditEventForm({
   event,
-  categories,
-  tournaments,
   onUpdate,
 }: {
   event: FormData;
@@ -157,6 +152,11 @@ function EditEventForm({
     ...event,
     saleStart: event.saleStart || null,
   });
+
+  const [selectedCategoryItem, setSelectedCategoryItem] =
+    useState<DropdownItem | null>(null);
+  const [selectedTournamentItem, setSelectedTournamentItem] =
+    useState<DropdownItem | null>(null);
 
   const handleInputChange = (
     field: string,
@@ -222,42 +222,28 @@ function EditEventForm({
       <div className="space-y-2">
         <label className="block font-medium">Category</label>
         <Dropdown
-          items={categories.map((cat) => ({
-            id: cat.id,
-            name: cat.category,
-          }))}
-          initialSelectedItems={
-            categories
-              .map((cat) => ({
-                id: cat.id,
-                name: cat.category,
-              }))
-              .find((cat) => cat.id === formData.category) || undefined
-          }
+          apiEndpoint="/api/getallcategories?"
+          value={selectedCategoryItem}
           placeholder="Select a category"
           // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-          onChange={(value: any) => handleInputChange("category", value.id)}
+          onChange={(option: any) => {
+            setSelectedCategoryItem(option);
+            handleInputChange("category", option.value);
+          }}
         />
       </div>
 
       <div className="space-y-2">
         <label className="block font-medium">Tournament</label>
         <Dropdown
-          items={tournaments
-            .filter((tour) => tour.category === formData.category)
-            .map((tour) => ({
-              id: tour.id,
-              name: tour.name,
-            }))}
-          initialSelectedItems={
-            tournaments.find((tour) => tour.id === formData.tournament) ||
-            undefined
-          }
+          apiEndpoint={`/api/getalltournaments?categoryId`}
+          value={selectedTournamentItem}
           placeholder="Select a tournament"
           // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-          onChange={(selectedItems: any) =>
-            handleInputChange("tournament", selectedItems.id)
-          }
+          onChange={(option: any) => {
+            setSelectedTournamentItem(option);
+            handleInputChange("tournament", option.value);
+          }}
         />
       </div>
 

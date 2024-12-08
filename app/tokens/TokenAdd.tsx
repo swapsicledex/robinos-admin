@@ -1,9 +1,8 @@
 import DarkPreview from "@/components/dashboard/ui/DarkPreview";
-import Dropdown from "@/components/dashboard/ui/Dropdown";
+import Dropdown, { DropdownItem } from "@/components/dashboard/ui/Dropdown";
 import LightPreview from "@/components/dashboard/ui/LightPreview";
-import { Chain } from "@/db/schema";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
@@ -15,14 +14,17 @@ export default function TokenAdd() {
   const [decimal, setDecimal] = useState<string>("18");
   const [isLoading, setIsLoading] = useState(false);
 
-  const [chains, setChains] = useState<Chain[]>([]);
+  // const [chains, setChains] = useState<Chain[]>([]);
+
+  const [selectedChainItem, setSelectedChainItem] =
+    useState<DropdownItem | null>(null);
 
   const [file, setFile] = useState<File | null>(null);
   const [previewURL, setPreviewURL] = useState<string | null>(null);
   const [preSignedUrl, setPreSignedUrl] = useState<string | null>(null);
   const [fileNameWithExtension, setFileNameWithExtension] = useState<
-  string | null
->(null);
+    string | null
+  >(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -50,19 +52,19 @@ export default function TokenAdd() {
     }
   };
 
-  const getAllData = async () => {
-    try {
-      const [chainRes] = await Promise.all([axios.get("/api/getallchains")]);
+  // const getAllData = async () => {
+  //   try {
+  //     const [chainRes] = await Promise.all([axios.get("/api/getallchains")]);
 
-      setChains(chainRes.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+  //     setChains(chainRes.data);
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //   }
+  // };
 
-  useEffect(() => {
-    getAllData();
-  }, []);
+  // useEffect(() => {
+  //   getAllData();
+  // }, []);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +88,7 @@ export default function TokenAdd() {
         name: name,
         chainId: chainId,
         decimal: decimal,
-        image:  `${process.env.NEXT_PUBLIC_CUSTOM_URL}/${fileNameWithExtension}`,
+        image: `${process.env.NEXT_PUBLIC_CUSTOM_URL}/${fileNameWithExtension}`,
       });
       toast.success(`Token added successfully!`);
       // Reset the form after submission
@@ -167,13 +169,15 @@ export default function TokenAdd() {
         <label className="block mb-2 font-medium">
           Chain
           <Dropdown
-            items={chains.map((chain) => ({
-              id: chain.chainId,
-              name: chain.name,
-            }))}
+            apiEndpoint="/api/getallchains?"
+            value={selectedChainItem}
             placeholder="Search and select an image"
+            valueKey="chainId"
             // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-            onChange={(value: any) => setChainId(value.id)}
+            onChange={(option: any) => {
+              setSelectedChainItem(option);
+              setChainId(option?.value);
+            }}
           />
         </label>
 

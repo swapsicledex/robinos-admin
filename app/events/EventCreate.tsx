@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 import "react-tabs/style/react-tabs.css";
 import axios from "axios";
-import Dropdown from "@/components/dashboard/ui/Dropdown";
+import Dropdown, { DropdownItem } from "@/components/dashboard/ui/Dropdown";
 import { toast } from "react-toastify";
-import { Category, Chain, Player, Token, Tournament } from "@/db/schema";
 import Image from "next/image";
 import DateTimePicker from "@/components/dashboard/ui/DateTimePicker";
 
@@ -29,50 +28,69 @@ export default function EventCreate() {
   const [handicapB, setHandicapB] = useState<string | null>(null);
   const [showHandicap, setShowHandicap] = useState<boolean>(false);
 
-  const [images, setImages] = useState<Player[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [tokens, setTokens] = useState<Token[]>([]);
-  const [chains, setChains] = useState<Chain[]>([]);
-  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  // const [images, setImages] = useState<Player[]>([]);
+  // const [categories, setCategories] = useState<Category[]>([]);
+  // const [tokens, setTokens] = useState<Token[]>([]);
+  // const [chains, setChains] = useState<Chain[]>([]);
+  // const [tournaments, setTournaments] = useState<Tournament[]>([]);
+
+  const [selectedCategoryItem, setSelectedCategoryItem] =
+    useState<DropdownItem | null>(null);
+  const [selectedTournamentItem, setSelectedTournamentItem] =
+    useState<DropdownItem | null>(null);
+  const [selectedTeamAItem, setSelectedTeamAItem] =
+    useState<DropdownItem | null>(null);
+  const [selectedTeamBItem, setSelectedTeamBItem] =
+    useState<DropdownItem | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
 
   const [chainsTokens, setChainsTokens] = useState<
-    { chainId: string; tokenId: string }[]
-  >([{ chainId: "", tokenId: "" }]);
+    {
+      chainId: string;
+      tokenId: string;
+      selectedChainItem: DropdownItem | null;
+      selectedTokenItem: DropdownItem | null;
+    }[]
+  >([
+    {
+      chainId: "",
+      tokenId: "",
+      selectedChainItem: null,
+      selectedTokenItem: null,
+    },
+  ]);
 
-  const getAllData = async () => {
-    setIsLoading(true);
-    try {
-      const [
-        imagesData,
-        categoriesData,
-        tokensData,
-        chainsData,
-        tournamentsData,
-      ] = await Promise.all([
-        axios.get("/api/getallimages"),
-        axios.get("/api/getallcategories"),
-        axios.get("/api/getalltokens"),
-        axios.get("/api/getallchains"),
-        axios.get("/api/getalltournaments"),
-      ]);
+  // const getAllData = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const [
+  //       imagesData,
+  //       categoriesData,
+  //       tokensData,
+  //       chainsData,
+  //       tournamentsData,
+  //     ] = await Promise.all([
+  //       axios.get("/api/getallimages"),
+  //       axios.get("/api/getallcategories"),
+  //       axios.get("/api/getalltokens"),
+  //       axios.get("/api/getallchains"),
+  //       axios.get("/api/getalltournaments"),
+  //     ]);
 
-      setImages(imagesData.data);
-      setCategories(categoriesData.data);
-      setTokens(tokensData.data);
-      setChains(chainsData.data);
-      setTournaments(tournamentsData.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //     setImages(imagesData.data);
+  //     setCategories(categoriesData.data);
+  //     setTokens(tokensData.data);
+  //     setChains(chainsData.data);
+  //     setTournaments(tournamentsData.data);
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
-  useEffect(() => {
-    getAllData();
-  }, []);
+  useEffect(() => {}, [chainsTokens, category]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,12 +132,23 @@ export default function EventCreate() {
     setTeamAImage(null);
     setTeamBImage(null);
     setCategory("");
-    setChainsTokens([{ chainId: "", tokenId: "" }]);
+    setChainsTokens([
+      {
+        chainId: "",
+        tokenId: "",
+        selectedChainItem: null,
+        selectedTokenItem: null,
+      },
+    ]);
     setConditions([""]);
     setTeamAId(null);
     setTeamBId(null);
     setIsFeatured(false);
     setTournament(null);
+    setSelectedCategoryItem(null);
+    setSelectedTournamentItem(null);
+    setSelectedTeamAItem(null);
+    setSelectedTeamBItem(null);
   };
 
   const handleEndTimeChange = (dateTime: Date) => {
@@ -143,22 +172,42 @@ export default function EventCreate() {
   };
 
   const handleAddChainTokenRow = () => {
-    setChainsTokens([...chainsTokens, { chainId: "", tokenId: "" }]);
+    setChainsTokens([
+      ...chainsTokens,
+      {
+        chainId: "",
+        tokenId: "",
+        selectedChainItem: null,
+        selectedTokenItem: null,
+      },
+    ]);
   };
 
   const handleRemoveChainTokenRow = (index: number) => {
     setChainsTokens(chainsTokens.filter((_, i) => i !== index));
   };
 
-  const handleChainChange = (index: number, chainId: string) => {
+  const handleChainChange = (
+    index: number,
+    chainId: string,
+    option: DropdownItem
+  ) => {
     const updated = [...chainsTokens];
     updated[index].chainId = chainId;
+    updated[index].selectedChainItem = option;
+    updated[index].tokenId = "";
+    updated[index].selectedTokenItem = null;
     setChainsTokens(updated);
   };
 
-  const handleTokenChange = (index: number, tokenId: string) => {
+  const handleTokenChange = (
+    index: number,
+    tokenId: string,
+    option: DropdownItem
+  ) => {
     const updated = [...chainsTokens];
     updated[index].tokenId = tokenId;
+    updated[index].selectedTokenItem = option;
     setChainsTokens(updated);
   };
 
@@ -271,32 +320,31 @@ export default function EventCreate() {
             <div key={index} className="flex items-center gap-4 mb-4">
               <div className="flex-1">
                 <Dropdown
-                  items={chains.map((chain) => ({
-                    id: chain.chainId,
-                    name: chain.name,
-                  }))}
+                  apiEndpoint="/api/getallchains?"
+                  value={chainToken.selectedChainItem}
                   placeholder="Select a chain"
+                  valueKey="chainId"
                   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-                  onChange={(value: any) => handleChainChange(index, value.id)}
+                  onChange={(option: any) => {
+                    setChainsTokens([
+                      ...chainsTokens,
+                      { ...chainToken, selectedChainItem: option },
+                    ]);
+                    handleChainChange(index, option?.value, option);
+                  }}
                 />
               </div>
               {chainToken.chainId ? (
                 <div className="flex-1">
                   <Dropdown
-                    items={tokens
-                      .filter(
-                        (token) =>
-                          token.chainId.toString() == chainToken.chainId
-                      )
-                      .map((token) => ({
-                        id: token.id,
-                        name: token.symbol,
-                      }))}
+                    apiEndpoint={`/api/getalltokens?chainId=${chainToken.chainId}`}
+                    value={chainToken.selectedTokenItem}
                     placeholder="Select a token"
+                    labelKey="symbol"
                     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-                    onChange={(value: any) =>
-                      handleTokenChange(index, value.id)
-                    }
+                    onChange={(option: any) => {
+                      handleTokenChange(index, option?.value, option);
+                    }}
                   />
                 </div>
               ) : null}
@@ -324,15 +372,16 @@ export default function EventCreate() {
           <label className="block mb-4 font-medium">
             Category
             <Dropdown
-              items={categories.map((cat) => ({
-                id: cat.id,
-                name: cat.category,
-              }))}
+              apiEndpoint="/api/getallcategories?"
               placeholder="Search and select a category"
+              value={selectedCategoryItem}
               // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-              onChange={(value: any) => {
-                setCategory(value.id);
-                if (value.name === "Football") {
+              onChange={(option: any) => {
+                setTournament(null);
+                setSelectedTournamentItem(null);
+                setSelectedCategoryItem(option);
+                setCategory(option.value.toString());
+                if (option.label === "Football") {
                   setShowHandicap(true);
                 } else {
                   setShowHandicap(false);
@@ -344,13 +393,15 @@ export default function EventCreate() {
           <label className="block mb-4 font-medium">
             Tournament
             <Dropdown
-              items={tournaments.filter(
-                (item) => item?.category?.toString() == category
-              )}
+              apiEndpoint={`/api/getalltournaments?categoryId=${Number(
+                category
+              )}`}
+              value={selectedTournamentItem}
               placeholder="Search and select a tournament"
               // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-              onChange={(value: any) => {
-                setTournament(value.id);
+              onChange={(option: any) => {
+                setSelectedTournamentItem(option);
+                setTournament(option.value);
               }}
             />
           </label>
@@ -361,17 +412,15 @@ export default function EventCreate() {
           <label className="block mb-4 font-medium">
             Team A
             <Dropdown
-              items={images.filter(
-                (item) => item.category.toString() == category
-              )}
+              apiEndpoint={`/api/getallimages?categoryId=${Number(category)}`}
+              value={selectedTeamAItem}
               placeholder="Search and select an image"
+              extraPropKey="url"
               // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-              onChange={(value: any) => {
-                setTeamAImage(
-                  images.filter((image) => image.id.toString() == value.id)[0]
-                    .url
-                );
-                setTeamAId(value.id);
+              onChange={(option: any) => {
+                setSelectedTeamAItem(option);
+                setTeamAImage(option?.extraProp);
+                setTeamAId(option?.value);
               }}
             />
             {teamAImage && (
@@ -407,17 +456,15 @@ export default function EventCreate() {
           <label className="block mb-4 font-medium">
             Team B
             <Dropdown
-              items={images.filter(
-                (item) => item.category.toString() == category
-              )}
+              apiEndpoint={`/api/getallimages?categoryId=${Number(category)}`}
+              value={selectedTeamBItem}
               placeholder="Search and select an image"
+              extraPropKey="url"
               // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-              onChange={(value: any) => {
-                setTeamBImage(
-                  images.filter((image) => image.id.toString() == value.id)[0]
-                    .url
-                );
-                setTeamBId(value.id);
+              onChange={(option: any) => {
+                setSelectedTeamBItem(option);
+                setTeamBImage(option?.extraProp);
+                setTeamBId(option?.value);
               }}
             />
             {teamBImage && (
