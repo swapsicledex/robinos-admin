@@ -1,6 +1,6 @@
 import { db } from "@/db/drizzle";
 import { tokens } from "@/db/schema";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { parse } from "querystring";
 import { eq, and, sql } from "drizzle-orm";
 
@@ -26,7 +26,14 @@ export async function GET(req: NextRequest) {
         .limit(parsedLimit)
         .offset(offset)
         .execute();
-      return Response.json(data);
+        return NextResponse.json({
+          data: data,
+          metadata: {
+            totalItems: 0,
+            totalPages: 0,
+            currentPage: parsedPage,
+          },
+        });
     } catch (error) {
       console.error("Error fetching tokens:", error);
       Response.json({ msg: "Failed to fetch tokens" });

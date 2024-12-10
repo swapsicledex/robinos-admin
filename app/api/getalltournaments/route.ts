@@ -1,6 +1,6 @@
 import { db } from "@/db/drizzle";
 import { tournaments } from "@/db/schema";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { parse } from "querystring";
 import { eq, and, sql } from "drizzle-orm";
 
@@ -19,14 +19,21 @@ export async function GET(req: NextRequest) {
     ].filter(Boolean); // Filter out undefined values directly in the array
 
     try {
-      const categories = await db
+      const data = await db
         .select()
         .from(tournaments)
         .where(and(...conditions))
         .limit(parsedLimit)
         .offset(offset)
         .execute();
-      return Response.json(categories);
+      return NextResponse.json({
+        data: data,
+        metadata: {
+          totalItems: 0,
+          totalPages: 0,
+          currentPage: parsedPage,
+        },
+      });
     } catch (error) {
       console.error("Error fetching categories:", error);
       Response.json({ msg: "Failed to fetch categories" });

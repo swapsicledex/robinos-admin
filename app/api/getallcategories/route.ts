@@ -1,6 +1,6 @@
 import { db } from "@/db/drizzle";
 import { category } from "@/db/schema";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { parse } from "querystring";
 import { and, sql } from "drizzle-orm";
 
@@ -25,7 +25,14 @@ export async function GET(req: NextRequest) {
         .limit(parsedLimit)
         .offset(offset)
         .execute();
-      return Response.json(categories);
+      return NextResponse.json({
+        data: categories,
+        metadata: {
+          totalItems: 0,
+          totalPages: 0,
+          currentPage: parsedPage,
+        },
+      });
     } catch (error) {
       console.error("Error fetching categories:", error);
       Response.json({ msg: "Failed to fetch categories" });

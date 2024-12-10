@@ -228,7 +228,7 @@ function EditEventForm({
           // eslint-disable-next-line  @typescript-eslint/no-explicit-any
           onChange={(option: any) => {
             setSelectedCategoryItem(option);
-            handleInputChange("category", option.value);
+            handleInputChange("category", option?.value);
           }}
         />
       </div>
@@ -242,7 +242,7 @@ function EditEventForm({
           // eslint-disable-next-line  @typescript-eslint/no-explicit-any
           onChange={(option: any) => {
             setSelectedTournamentItem(option);
-            handleInputChange("tournament", option.value);
+            handleInputChange("tournament", option?.value);
           }}
         />
       </div>

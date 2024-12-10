@@ -11,10 +11,10 @@ import DateTimePicker from "@/components/dashboard/ui/DateTimePicker";
 export default function EventCreate() {
   const [eventName, setEventName] = useState("");
   const [saleEndTime, setSaleEndTime] = useState(
-    parseInt((Date.now() / 1000).toString())
+    parseInt(Math.floor(Date.now() / 1000).toString())
   );
   const [saleStartTime, setSaleStartTime] = useState(
-    parseInt((Date.now() / 1000).toString())
+    parseInt(Math.floor(Date.now() / 1000).toString())
   );
   const [teamAImage, setTeamAImage] = useState<string | null>(null);
   const [teamBImage, setTeamBImage] = useState<string | null>(null);
@@ -152,10 +152,10 @@ export default function EventCreate() {
   };
 
   const handleEndTimeChange = (dateTime: Date) => {
-    setSaleEndTime(dateTime.getTime() / 1000);
+    setSaleEndTime(Math.floor(dateTime.getTime() / 1000));
   };
   const handleStartTimeChange = (dateTime: Date) => {
-    setSaleStartTime(dateTime.getTime() / 1000);
+    setSaleStartTime(Math.floor(dateTime.getTime() / 1000));
   };
 
   const handleConditionChange = (index: number, value: string) => {
@@ -210,7 +210,6 @@ export default function EventCreate() {
     updated[index].selectedTokenItem = option;
     setChainsTokens(updated);
   };
-
   return (
     <>
       {isLoading && (
@@ -240,13 +239,6 @@ export default function EventCreate() {
             Sale Start Time (Unix Timestamp)
           </label>
           <DateTimePicker onDateTimeChange={handleStartTimeChange} />
-          <input
-            type="text"
-            value={saleStartTime}
-            onChange={(e) => setSaleStartTime(Number(e.target.value))}
-            className="border border-gray-300 rounded-lg p-2 w-full"
-            disabled
-          />
         </fieldset>
 
         <fieldset className="mb-6 border border-gray-200 rounded-lg p-4 mt-4">
@@ -254,13 +246,6 @@ export default function EventCreate() {
             Sale End Time (Unix Timestamp)
           </label>
           <DateTimePicker onDateTimeChange={handleEndTimeChange} />
-          <input
-            type="text"
-            value={saleEndTime}
-            onChange={(e) => setSaleEndTime(Number(e.target.value))}
-            className="border border-gray-300 rounded-lg p-2 w-full"
-            disabled
-          />
         </fieldset>
 
         <div className="mt-4 mb-2">
@@ -380,8 +365,8 @@ export default function EventCreate() {
                 setTournament(null);
                 setSelectedTournamentItem(null);
                 setSelectedCategoryItem(option);
-                setCategory(option.value.toString());
-                if (option.label === "Football") {
+                setCategory(option?.value.toString());
+                if (option?.label === "Football") {
                   setShowHandicap(true);
                 } else {
                   setShowHandicap(false);
@@ -401,7 +386,7 @@ export default function EventCreate() {
               // eslint-disable-next-line  @typescript-eslint/no-explicit-any
               onChange={(option: any) => {
                 setSelectedTournamentItem(option);
-                setTournament(option.value);
+                setTournament(option?.value);
               }}
             />
           </label>
