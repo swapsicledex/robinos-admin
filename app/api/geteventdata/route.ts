@@ -19,9 +19,9 @@ export async function GET(req: NextRequest) {
       page = 1,
     } = queryParams;
 
-    if (!chainId) {
-      return Response.json({ error: "Missing required parameters" });
-    }
+    // if (!chainId) {
+    //   return Response.json({ error: "Missing required parameters" });
+    // }
 
     const parsedLimit = Math.max(1, parseInt(limit as string, 10));
     const parsedPage = Math.max(1, parseInt(page as string, 10));
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
 
     // Building the conditions directly in the query to avoid extra filtering
     const conditions = [
-      eq(events.chainId, Number(chainId)),
+      chainId ? eq(events.chainId, Number(chainId)) : undefined,
       categoryId ? eq(events.category, Number(categoryId)) : undefined,
       tournamentId ? eq(events.tournament, Number(tournamentId)) : undefined,
       featuredValue === "true" ? eq(events.isFeatured, true) : undefined,
@@ -81,6 +81,7 @@ export async function GET(req: NextRequest) {
             standardTokenAddress: tokens.address,
             tokenName: tokens.symbol,
             tokenDecimal: tokens.decimal,
+            chainId: events.chainId
           })
           .from(events)
           .innerJoin(teamA, eq(teamA.id, events.teamA)) // Join team A
@@ -109,7 +110,7 @@ export async function GET(req: NextRequest) {
       // Return the paginated response
       return Response.json({
         data: eventData,
-        meta: {
+        metadata: {
           totalItems,
           currentPage: parsedPage,
           totalPages: Math.ceil(totalItems / parsedLimit),
