@@ -113,6 +113,7 @@ export async function GET(req: NextRequest) {
           totalItems,
           currentPage: parsedPage,
           totalPages: Math.ceil(totalItems / parsedLimit),
+          itemsPerPage: parsedLimit,
         },
       });
     } catch (error) {

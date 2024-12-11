@@ -31,6 +31,7 @@ export async function GET(req: NextRequest) {
           totalItems: 0,
           totalPages: 0,
           currentPage: parsedPage,
+          itemsPerPage: parsedLimit,
         },
       });
     } catch (error) {
