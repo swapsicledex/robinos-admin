@@ -1,13 +1,19 @@
 import { db } from "@/db/drizzle";
-import { players } from "@/db/schema";
-import { NextRequest } from "next/server";
+import { category, players, tournaments } from "@/db/schema";
+import { NextRequest, NextResponse } from "next/server";
 import { parse } from "querystring";
 import { eq, and, sql } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   if (req.method === "GET") {
     const queryParams = parse(req.url?.split("?")[1] || "");
-    const { categoryId, search, limit = 20, page = 1 } = queryParams;
+    const {
+      tournamentId,
+      categoryId,
+      search,
+      limit = 20,
+      page = 1,
+    } = queryParams;
 
     const parsedLimit = Math.max(1, parseInt(limit as string, 10));
     const parsedPage = Math.max(1, parseInt(page as string, 10));
@@ -15,21 +21,55 @@ export async function GET(req: NextRequest) {
 
     const conditions = [
       categoryId ? eq(players.category, Number(categoryId)) : undefined,
+      tournamentId ? eq(players.tournament, Number(tournamentId)) : undefined,
       search ? sql`${players.name} ILIKE ${`%${search}%`}` : undefined,
     ].filter(Boolean); // Filter out undefined values directly in the array
 
     try {
-      const userData = await db
-        .select()
-        .from(players)
-        .where(and(...conditions))
-        .limit(parsedLimit)
-        .offset(offset)
-        .execute();
-      return Response.json(userData);
+      const [totalCountResult, userData] = await Promise.all([
+        db
+          .select({ count: sql`COUNT(*)` })
+          .from(players)
+          .innerJoin(category, eq(category.id, players.category))
+          .leftJoin(tournaments, eq(tournaments.id, players.tournament))
+          .where(and(...conditions))
+          .execute(),
+        db
+          .select({
+            id: players.id,
+            name: players.name,
+            symbol: players.symbol,
+            url: players.url,
+            category: category.name,
+            tournament: tournaments.name,
+          })
+          .from(players)
+          .innerJoin(category, eq(category.id, players.category))
+          .leftJoin(tournaments, eq(tournaments.id, players.tournament))
+          .where(and(...conditions))
+          .limit(parsedLimit)
+          .offset(offset)
+          .execute(),
+      ]);
+
+      const totalItems = (totalCountResult[0]?.count as number) || 0;
+      const totalPages = Math.ceil(totalItems / parsedLimit);
+
+      return NextResponse.json({
+        data: userData,
+        metadata: {
+          totalItems,
+          totalPages,
+          currentPage: parsedPage,
+          itemsPerPage: parsedLimit,
+        },
+      });
     } catch (error) {
       console.error("Error fetching players:", error);
-      Response.json({ msg: "Failed to fetch players" });
+      return NextResponse.json(
+        { msg: "Failed to fetch players" },
+        { status: 500 }
+      );
     }
   }
 }

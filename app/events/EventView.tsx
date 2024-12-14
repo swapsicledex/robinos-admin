@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Dropdown, { DropdownItem } from "@/components/dashboard/ui/Dropdown";
 import DateTimePicker from "@/components/dashboard/ui/DateTimePicker";
-import { Category, Tournament } from "@/db/schema";
+import { category } from "@/db/schema";
 
 type FormData = {
   id: number;
-  code: string;
+  eventCode: string;
   chainId: number;
   isFeatured: boolean;
   saleStart: number | null;
@@ -22,15 +22,32 @@ type FormData = {
 export default function EventList() {
   const [events, setEvents] = useState<FormData[]>([]);
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  // const [categories, setCategories] = useState<Category[]>([]);
+  // const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [category, setCategory] = useState(null);
+  const [tournament, setTournament] = useState(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedCategoryItem, setSelectedCategoryItem] =
+    useState<DropdownItem | null>(null);
+  const [selectedTournamentItem, setSelectedTournamentItem] =
+    useState<DropdownItem | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchEvents = async () => {
     setIsLoading(true);
     try {
-      const { data } = await axios.get("/api/getallevents");
-      setEvents(data);
+      const { data } = await axios.get("/api/geteventdata", {
+        params: {
+          search: searchQuery,
+          categoryId: category,
+          tournamentId: tournament,
+          page: currentPage,
+        },
+      });
+      setEvents(data.data);
+      setTotalPages(data.metadata.totalPages);
     } catch (error) {
       console.error("Error fetching events:", error);
       toast.error("Failed to fetch events.");
@@ -39,18 +56,18 @@ export default function EventList() {
     }
   };
 
-  const fetchAuxiliaryData = async () => {
-    try {
-      const [categoriesData, tournamentsData] = await Promise.all([
-        axios.get("/api/getallcategories"),
-        axios.get("/api/getalltournaments"),
-      ]);
-      setCategories(categoriesData.data);
-      setTournaments(tournamentsData.data);
-    } catch (error) {
-      console.error("Error fetching auxiliary data:", error);
-    }
-  };
+  // const fetchAuxiliaryData = async () => {
+  //   try {
+  //     const [categoriesData, tournamentsData] = await Promise.all([
+  //       axios.get("/api/getallcategories"),
+  //       axios.get("/api/getalltournaments"),
+  //     ]);
+  //     setCategories(categoriesData.data);
+  //     setTournaments(tournamentsData.data);
+  //   } catch (error) {
+  //     console.error("Error fetching auxiliary data:", error);
+  //   }
+  // };
 
   const updateEvent = async (updatedData: FormData) => {
     try {
@@ -65,12 +82,56 @@ export default function EventList() {
 
   useEffect(() => {
     fetchEvents();
-    fetchAuxiliaryData();
-  }, []);
+    // fetchAuxiliaryData();
+  }, [currentPage, searchQuery, category, tournament]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1); // Reset to first page when searching
+  };
+
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+  const handleCategoryChange = (option: any) => {
+    setCategory(option?.value);
+    setSelectedCategoryItem(option);
+    setCurrentPage(1); // Reset to first page when filtering
+  };
+
+   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+  const handleTournamentChange = (option: any) => {
+    setTournament(option?.value);
+    setSelectedTournamentItem(option);
+    setCurrentPage(1); // Reset to first page when filtering
+  };
 
   return (
     <div className="max-w-5xl mx-auto mt-10">
       <h2 className="text-2xl font-semibold mb-6">All Events</h2>
+
+      <div className="mb-6 flex space-x-4">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={handleSearch}
+          placeholder="Search events..."
+          className="border border-gray-300 rounded-lg p-3 w-1/3"
+        />
+        <Dropdown
+          apiEndpoint="/api/getallcategories?"
+          placeholder="Filter by Category"
+          value={selectedCategoryItem}
+          // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+          onChange={(option: any) => handleCategoryChange(option)}
+        />
+        <Dropdown
+          apiEndpoint={`/api/getalltournaments?categoryId=${category}`}
+          placeholder="Filter by Tournament"
+          value={selectedTournamentItem}
+          // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+          onChange={(option: any) => handleTournamentChange(option)}
+        />
+      </div>
+
       {isLoading ? (
         <div className="text-center">Loading...</div>
       ) : (
@@ -85,25 +146,23 @@ export default function EventList() {
               <th className="border border-gray-300 p-2">Actions</th>
             </tr>
           </thead>
-          <tbody key="body">
+          <tbody>
             {events.map((event, index) => (
-              <>
+              <React.Fragment key={index}>
                 <tr
-                  key={event.id}
                   className="cursor-pointer"
                   onClick={() =>
                     setExpandedRow(expandedRow === index ? null : index)
                   }
                 >
-                  <td className="border border-gray-300 p-2">{event.code}</td>
                   <td className="border border-gray-300 p-2">
-                    {categories.find((cat) => cat.id === event.category)?.name}
+                    {event.eventCode}
                   </td>
                   <td className="border border-gray-300 p-2">
-                    {
-                      tournaments.find((tour) => tour.id === event.tournament)
-                        ?.name
-                    }
+                    {event.category}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {event.tournament}
                   </td>
                   <td className="border border-gray-300 p-2">
                     {event.chainId}
@@ -121,20 +180,37 @@ export default function EventList() {
                       colSpan={6}
                       className="border border-gray-300 p-4 bg-gray-50"
                     >
-                      <EditEventForm
-                        event={event}
-                        categories={categories}
-                        tournaments={tournaments}
-                        onUpdate={updateEvent}
-                      />
+                      <EditEventForm event={event} onUpdate={updateEvent} />
                     </td>
                   </tr>
                 )}
-              </>
+              </React.Fragment>
             ))}
           </tbody>
         </table>
       )}
+
+      <div className="flex justify-between items-center mt-6">
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className="bg-gray-300 px-4 py-2 rounded-lg disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+          disabled={currentPage === totalPages}
+          className="bg-gray-300 px-4 py-2 rounded-lg disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }
@@ -144,8 +220,6 @@ function EditEventForm({
   onUpdate,
 }: {
   event: FormData;
-  categories: Category[];
-  tournaments: Tournament[];
   onUpdate: (updatedData: FormData) => void;
 }) {
   const [formData, setFormData] = useState<FormData>({
@@ -191,8 +265,8 @@ function EditEventForm({
         <label className="block font-medium">Event Code</label>
         <input
           type="text"
-          value={formData.code}
-          onChange={(e) => handleInputChange("code", e.target.value)}
+          value={formData.eventCode}
+          onChange={(e) => handleInputChange("eventCode", e.target.value)}
           className="border border-gray-300 rounded-lg p-3 w-full"
         />
       </div>
@@ -228,7 +302,7 @@ function EditEventForm({
           // eslint-disable-next-line  @typescript-eslint/no-explicit-any
           onChange={(option: any) => {
             setSelectedCategoryItem(option);
-            handleInputChange("category", option.value);
+            handleInputChange("category", option?.value);
           }}
         />
       </div>
@@ -236,13 +310,13 @@ function EditEventForm({
       <div className="space-y-2">
         <label className="block font-medium">Tournament</label>
         <Dropdown
-          apiEndpoint={`/api/getalltournaments?categoryId`}
+          apiEndpoint={`/api/getalltournaments?categoryId=${category}`}
           value={selectedTournamentItem}
           placeholder="Select a tournament"
           // eslint-disable-next-line  @typescript-eslint/no-explicit-any
           onChange={(option: any) => {
             setSelectedTournamentItem(option);
-            handleInputChange("tournament", option.value);
+            handleInputChange("tournament", option?.value);
           }}
         />
       </div>

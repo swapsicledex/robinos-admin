@@ -62,7 +62,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 
         // Transform data from API into the format needed by the dropdown
          // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-        const options = data.map((item: any) => ({
+        const options = data?.data?.map((item: any) => ({
           value: item[`${valueKey}`],
           label: item[`${labelKey}`],
           extraProp: extraPropKey ? item[`${extraPropKey}`] : null,

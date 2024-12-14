@@ -1,6 +1,6 @@
 import { db } from "@/db/drizzle";
 import { events } from "@/db/schema";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { parse } from "querystring";
 import { and, sql } from "drizzle-orm";
 
@@ -25,7 +25,15 @@ export async function GET(req: NextRequest) {
         .limit(parsedLimit)
         .offset(offset)
         .execute();
-      return Response.json(eventData);
+        return NextResponse.json({
+          data: eventData,
+          metadata: {
+            totalItems: 0,
+            totalPages: 0,
+            currentPage: parsedPage,
+            itemsPerPage: parsedLimit,
+          },
+        });
     } catch (error) {
       console.error("Error fetching events:", error);
       Response.json({ msg: "Failed to fetch events" });
