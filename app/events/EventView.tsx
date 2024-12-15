@@ -24,9 +24,12 @@ export default function EventList() {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
   // const [categories, setCategories] = useState<Category[]>([]);
   // const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [chain, setChain] = useState(null);
   const [category, setCategory] = useState(null);
   const [tournament, setTournament] = useState(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedChainItem, setSelectedChainItem] =
+    useState<DropdownItem | null>(null);
   const [selectedCategoryItem, setSelectedCategoryItem] =
     useState<DropdownItem | null>(null);
   const [selectedTournamentItem, setSelectedTournamentItem] =
@@ -40,6 +43,7 @@ export default function EventList() {
     try {
       const { data } = await axios.get("/api/geteventdata", {
         params: {
+          chainId: chain,
           search: searchQuery,
           categoryId: category,
           tournamentId: tournament,
@@ -83,7 +87,7 @@ export default function EventList() {
   useEffect(() => {
     fetchEvents();
     // fetchAuxiliaryData();
-  }, [currentPage, searchQuery, category, tournament]);
+  }, [currentPage, searchQuery, category, tournament, chain]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -97,10 +101,17 @@ export default function EventList() {
     setCurrentPage(1); // Reset to first page when filtering
   };
 
-   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   const handleTournamentChange = (option: any) => {
     setTournament(option?.value);
     setSelectedTournamentItem(option);
+    setCurrentPage(1); // Reset to first page when filtering
+  };
+
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+  const handleChainChange = (option: any) => {
+    setChain(option?.value);
+    setSelectedChainItem(option);
     setCurrentPage(1); // Reset to first page when filtering
   };
 
@@ -115,6 +126,14 @@ export default function EventList() {
           onChange={handleSearch}
           placeholder="Search events..."
           className="border border-gray-300 rounded-lg p-3 w-1/3"
+        />
+        <Dropdown
+          apiEndpoint={`/api/getallchains?`}
+          placeholder="Filter by Chain"
+          value={selectedChainItem}
+          valueKey="chainId"
+          // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+          onChange={(option: any) => handleChainChange(option)}
         />
         <Dropdown
           apiEndpoint="/api/getallcategories?"
@@ -231,6 +250,8 @@ function EditEventForm({
     useState<DropdownItem | null>(null);
   const [selectedTournamentItem, setSelectedTournamentItem] =
     useState<DropdownItem | null>(null);
+  const [selectedChainItem, setSelectedChainItem] =
+    useState<DropdownItem | null>(null);
 
   const handleInputChange = (
     field: string,
@@ -290,6 +311,20 @@ function EditEventForm({
           onDateTimeChange={(date) =>
             handleInputChange("saleEnd", Math.floor(date.getTime() / 1000))
           }
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="block font-medium">Chain</label>
+        <Dropdown
+          apiEndpoint="/api/getallchains?"
+          value={selectedChainItem}
+          placeholder="Select a chain"
+          // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+          onChange={(option: any) => {
+            setSelectedChainItem(option);
+            handleInputChange("chain", option?.value);
+          }}
         />
       </div>
 

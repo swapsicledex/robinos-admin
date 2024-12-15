@@ -9,7 +9,7 @@ export default function CategoryView() {
     setIsLoading(true);
     const response = await axios.get("/api/getallcategories");
     setIsLoading(false);
-    setAllCategories(response.data);
+    setAllCategories(response?.data?.data);
   };
 
   useEffect(() => {

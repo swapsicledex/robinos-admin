@@ -1,5 +1,5 @@
 import { db } from "@/db/drizzle";
-import { tokens } from "@/db/schema";
+import { chains, tokens } from "@/db/schema";
 import { NextRequest, NextResponse } from "next/server";
 import { parse } from "querystring";
 import { eq, and, sql } from "drizzle-orm";
@@ -16,28 +16,57 @@ export async function GET(req: NextRequest) {
     const conditions = [
       chainId ? eq(tokens.chainId, Number(chainId)) : undefined,
       search ? sql`${tokens.symbol} ILIKE ${`%${search}%`}` : undefined,
-    ].filter(Boolean); // Filter out undefined values directly in the array
+    ].filter(Boolean);
 
     try {
-      const data = await db
-        .select()
+      // Fetch the total number of items
+      const totalItemsResult = await db
+        .select({
+          total: sql<number>`COUNT(*)`,
+        })
         .from(tokens)
+        .innerJoin(chains, eq(chains.chainId, tokens.chainId))
+        .where(and(...conditions))
+        .execute();
+
+      const totalItems = totalItemsResult[0]?.total || 0;
+      const totalPages = Math.ceil(totalItems / parsedLimit);
+
+      // Fetch the paginated data
+      const data = await db
+        .select({
+          id: tokens.id,
+          name: tokens.name,
+          symbol: tokens.symbol,
+          address: tokens.address,
+          chainId: chains.name,
+          imageUrl: tokens.imageUrl,
+          decimal: tokens.decimal,
+        })
+        .from(tokens)
+        .innerJoin(chains, eq(chains.chainId, tokens.chainId))
         .where(and(...conditions))
         .limit(parsedLimit)
         .offset(offset)
         .execute();
-        return NextResponse.json({
-          data: data,
-          metadata: {
-            totalItems: 0,
-            totalPages: 0,
-            currentPage: parsedPage,
-            itemsPerPage: parsedLimit,
-          },
-        });
+
+      return NextResponse.json({
+        data,
+        metadata: {
+          totalItems,
+          totalPages,
+          currentPage: parsedPage,
+          itemsPerPage: parsedLimit,
+        },
+      });
     } catch (error) {
       console.error("Error fetching tokens:", error);
-      Response.json({ msg: "Failed to fetch tokens" });
+      return NextResponse.json(
+        { msg: "Failed to fetch tokens" },
+        { status: 500 }
+      );
     }
   }
+
+  return NextResponse.json({ msg: "Method not allowed" }, { status: 405 });
 }

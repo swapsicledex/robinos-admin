@@ -9,7 +9,7 @@ export default function TokenView() {
     setIsLoading(true);
     const response = await axios.get("/api/getalltokens");
     setIsLoading(false);
-    setAllTokens(response.data);
+    setAllTokens(response?.data?.data);
   };
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export default function TokenView() {
                 Symbol
               </th>
               <th className="p-4 text-left text-gray-700 font-medium">
-                Address
+                Chain
               </th>
               <th className="p-4 text-left text-gray-700 font-medium">
                 Decimal
@@ -43,7 +43,7 @@ export default function TokenView() {
               allTokens.map((token) => (
                 <tr key={token.id} className="border-b hover:bg-gray-50">
                   <td className="p-4 text-gray-800">{token.symbol}</td>
-                  <td className="p-4 text-gray-800">{token.address}</td>
+                  <td className="p-4 text-gray-800">{token.chainId}</td>
                   <td className="p-4 text-gray-800">{token.decimal}</td>
                 </tr>
               ))

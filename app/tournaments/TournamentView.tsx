@@ -9,7 +9,7 @@ export default function TournamentView() {
     setIsLoading(true);
     const response = await axios.get("/api/getalltournaments");
     setIsLoading(false);
-    setAllTournaments(response.data);
+    setAllTournaments(response?.data?.data);
   };
 
   useEffect(() => {
