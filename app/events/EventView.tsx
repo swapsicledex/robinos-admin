@@ -5,7 +5,6 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import Dropdown, { DropdownItem } from "@/components/dashboard/ui/Dropdown";
 import DateTimePicker from "@/components/dashboard/ui/DateTimePicker";
-import { category } from "@/db/schema";
 
 type FormData = {
   id: number;
@@ -14,16 +13,16 @@ type FormData = {
   isFeatured: boolean;
   saleStart: number | null;
   saleEnd: number;
-  category: number;
-  tournament: number | null;
+  category: string;
+  tournament: string | null;
   conditions: string[];
+  categoryId: number;
+  tournamentId: number;
 };
 
 export default function EventList() {
   const [events, setEvents] = useState<FormData[]>([]);
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
-  // const [categories, setCategories] = useState<Category[]>([]);
-  // const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [chain, setChain] = useState(null);
   const [category, setCategory] = useState(null);
   const [tournament, setTournament] = useState(null);
@@ -73,9 +72,23 @@ export default function EventList() {
   //   }
   // };
 
-  const updateEvent = async (updatedData: FormData) => {
+  const updateEvent = async (
+    updatedData: FormData,
+    catId: number,
+    torId: number
+  ) => {
     try {
-      await axios.put("/api/updateevent", updatedData);
+      console.log("updatedData: ", updatedData);
+      await axios.put("/api/updateevent", {
+        id: updatedData.id,
+        code: updatedData.eventCode,
+        saleEnd: updatedData.saleEnd,
+        saleStart: updatedData.saleStart,
+        isFeatured: updatedData.isFeatured,
+        category: catId,
+        conditions: updatedData.conditions,
+        tournament: torId,
+      });
       toast.success("Event updated successfully!");
       fetchEvents();
     } catch (error) {
@@ -239,7 +252,7 @@ function EditEventForm({
   onUpdate,
 }: {
   event: FormData;
-  onUpdate: (updatedData: FormData) => void;
+  onUpdate: (updatedData: FormData, catId: number, torId: number) => void;
 }) {
   const [formData, setFormData] = useState<FormData>({
     ...event,
@@ -247,11 +260,22 @@ function EditEventForm({
   });
 
   const [selectedCategoryItem, setSelectedCategoryItem] =
-    useState<DropdownItem | null>(null);
+    useState<DropdownItem | null>({
+      value: event.categoryId,
+      label: event.category,
+    });
   const [selectedTournamentItem, setSelectedTournamentItem] =
-    useState<DropdownItem | null>(null);
-  const [selectedChainItem, setSelectedChainItem] =
-    useState<DropdownItem | null>(null);
+    useState<DropdownItem | null>({
+      value: event.tournamentId ?? "",
+      label: event.tournament ?? "",
+    });
+
+  const [selectedCategoryId, setSelectedCategoryId] = useState(
+    event.categoryId
+  );
+  const [selectedTournamentId, setSelectedTournamentId] = useState(
+    event.tournamentId
+  );
 
   const handleInputChange = (
     field: string,
@@ -277,7 +301,7 @@ function EditEventForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdate(formData);
+    onUpdate(formData, selectedCategoryId, selectedTournamentId);
   };
 
   return (
@@ -315,20 +339,6 @@ function EditEventForm({
       </div>
 
       <div className="space-y-2">
-        <label className="block font-medium">Chain</label>
-        <Dropdown
-          apiEndpoint="/api/getallchains?"
-          value={selectedChainItem}
-          placeholder="Select a chain"
-          // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-          onChange={(option: any) => {
-            setSelectedChainItem(option);
-            handleInputChange("chain", option?.value);
-          }}
-        />
-      </div>
-
-      <div className="space-y-2">
         <label className="block font-medium">Category</label>
         <Dropdown
           apiEndpoint="/api/getallcategories?"
@@ -337,7 +347,8 @@ function EditEventForm({
           // eslint-disable-next-line  @typescript-eslint/no-explicit-any
           onChange={(option: any) => {
             setSelectedCategoryItem(option);
-            handleInputChange("category", option?.value);
+            handleInputChange("category", option?.label);
+            setSelectedCategoryId(option?.value);
           }}
         />
       </div>
@@ -345,13 +356,14 @@ function EditEventForm({
       <div className="space-y-2">
         <label className="block font-medium">Tournament</label>
         <Dropdown
-          apiEndpoint={`/api/getalltournaments?categoryId=${category}`}
+          apiEndpoint={`/api/getalltournaments?categoryId=${selectedCategoryId}`}
           value={selectedTournamentItem}
           placeholder="Select a tournament"
           // eslint-disable-next-line  @typescript-eslint/no-explicit-any
           onChange={(option: any) => {
             setSelectedTournamentItem(option);
-            handleInputChange("tournament", option?.value);
+            handleInputChange("tournament", option?.label);
+            setSelectedTournamentId(option?.value);
           }}
         />
       </div>
@@ -369,7 +381,7 @@ function EditEventForm({
 
       <fieldset className="border border-gray-200 p-4 rounded-lg space-y-4">
         <legend className="font-medium text-lg">Conditions</legend>
-        {formData.conditions.map((condition, index) => (
+        {formData?.conditions?.map((condition, index) => (
           <div key={index} className="flex items-center space-x-2">
             <input
               type="text"
