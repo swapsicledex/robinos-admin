@@ -1,6 +1,6 @@
 import { db } from "@/db/drizzle";
 import { events, players, tokens, category, tournaments } from "@/db/schema";
-import { eq, gte, lte, and, aliasedTable, sql } from "drizzle-orm";
+import { eq, gte, lte, and, aliasedTable, sql, desc } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { parse } from "querystring";
 
@@ -53,6 +53,7 @@ export async function GET(req: NextRequest) {
       const [eventData, totalItems] = await Promise.all([
         db
           .select({
+            id: events.id,
             eventCode: events.code,
             saleEnd: events.saleEnd,
             conditions: events.conditions,
@@ -81,7 +82,10 @@ export async function GET(req: NextRequest) {
             standardTokenAddress: tokens.address,
             tokenName: tokens.symbol,
             tokenDecimal: tokens.decimal,
-            chainId: events.chainId
+            chainId: events.chainId,
+            isFeatured: events.isFeatured,
+            categoryId: events.category,
+            tournamentId: events.tournament,
           })
           .from(events)
           .innerJoin(teamA, eq(teamA.id, events.teamA)) // Join team A
@@ -90,6 +94,7 @@ export async function GET(req: NextRequest) {
           .innerJoin(category, eq(category.id, events.category)) // Join category
           .leftJoin(tournaments, eq(tournaments.id, events.tournament)) // Join tournaments
           .where(and(...conditions)) // Apply all conditions
+          .orderBy(desc(events.saleEnd))
           .limit(parsedLimit)
           .offset(offset)
           .execute(),

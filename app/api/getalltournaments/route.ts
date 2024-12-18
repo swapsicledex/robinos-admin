@@ -1,5 +1,5 @@
 import { db } from "@/db/drizzle";
-import { tournaments } from "@/db/schema";
+import { category, tournaments } from "@/db/schema";
 import { NextRequest, NextResponse } from "next/server";
 import { parse } from "querystring";
 import { eq, and, sql } from "drizzle-orm";
@@ -9,36 +9,46 @@ export async function GET(req: NextRequest) {
     const queryParams = parse(req.url?.split("?")[1] || "");
     const { categoryId, search, limit = 20, page = 1 } = queryParams;
 
-    const parsedLimit = Math.max(1, parseInt(limit as string, 10)); // Ensure a minimum limit of 1
-    const parsedPage = Math.max(1, parseInt(page as string, 10)); // Ensure a minimum page number of 1
+    const parsedLimit = Math.max(1, parseInt(limit as string, 10)); // Minimum limit of 1
+    const parsedPage = Math.max(1, parseInt(page as string, 10)); // Minimum page number of 1
     const offset = (parsedPage - 1) * parsedLimit;
 
     const conditions = [
       categoryId ? eq(tournaments.category, Number(categoryId)) : undefined,
       search ? sql`${tournaments.name} ILIKE ${`%${search}%`}` : undefined,
-    ].filter(Boolean); // Remove undefined values
+    ].filter(Boolean); // Remove undefined conditions
 
     try {
       // Fetch total count for pagination
-      const totalCountQuery = db
-        .select({ count: sql<number>`count(*)` })
+      const totalCountResult = await db
+        .select({
+          total: sql<number>`COUNT(*)`,
+        })
         .from(tournaments)
-        .where(and(...conditions));
+        .innerJoin(category, eq(category.id, tournaments.category))
+        .where(and(...conditions))
+        .execute();
 
-      const [{ count: totalItems }] = await totalCountQuery.execute();
+      const totalItems = totalCountResult[0]?.total || 0;
       const totalPages = Math.ceil(totalItems / parsedLimit);
 
       // Fetch paginated data
       const data = await db
-        .select()
+        .select({
+          id: tournaments.id,
+          category: category.name,
+          name: tournaments.name,
+          imageUrl: tournaments.imageUrl,
+        })
         .from(tournaments)
+        .innerJoin(category, eq(category.id, tournaments.category))
         .where(and(...conditions))
         .limit(parsedLimit)
         .offset(offset)
         .execute();
 
       return NextResponse.json({
-        data: data,
+        data,
         metadata: {
           totalItems,
           totalPages,
@@ -54,4 +64,6 @@ export async function GET(req: NextRequest) {
       );
     }
   }
+
+  return NextResponse.json({ msg: "Method not allowed" }, { status: 405 });
 }

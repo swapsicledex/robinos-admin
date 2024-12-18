@@ -9,7 +9,7 @@ export default function ChainsView() {
     setIsLoading(true);
     const response = await axios.get("/api/getallchains");
     setIsLoading(false);
-    setAllChains(response.data);
+    setAllChains(response?.data?.data);
   };
 
   useEffect(() => {
@@ -28,7 +28,6 @@ export default function ChainsView() {
           <thead className="bg-gray-100 border-b">
             <tr className="bg-gray-200 text-left">
               <th className="px-4 py-2">Chain Name</th>
-              <th className="px-4 py-2">Chain ID</th>
               <th className="px-4 py-2">Is Mainnet</th>
             </tr>
           </thead>
@@ -37,7 +36,6 @@ export default function ChainsView() {
               allChains.map((chain) => (
                 <tr key={chain.chainId} className="border-b hover:bg-gray-50">
                   <td className="p-4 text-gray-800">{chain.name}</td>
-                  <td className="p-4 text-gray-800">{chain.chainId}</td>
                   <td className="p-4 text-gray-800">
                     {chain.isMainnet ? "Yes" : "No"}
                   </td>
@@ -49,7 +47,7 @@ export default function ChainsView() {
                   colSpan={5}
                   className="p-4 text-center text-gray-500 font-medium"
                 >
-                  No tokens found.
+                  No chains found.
                 </td>
               </tr>
             )}

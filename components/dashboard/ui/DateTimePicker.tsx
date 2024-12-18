@@ -97,8 +97,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   };
 
   useEffect(() => {
-    const now = new Date();
-    updateDateTime(now);
+    updateDateTime(initialDateTime);
   }, []);
 
   return (
