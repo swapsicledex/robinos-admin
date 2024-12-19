@@ -65,6 +65,8 @@ export async function GET(req: NextRequest) {
               name: sql`CASE 
                       WHEN ${events.handicapTeamA} IS NOT NULL 
                         THEN ${teamA.symbol} || ' ' || ${events.handicapTeamA} 
+                      WHEN ${events.booleanTeamA} IS NOT NULL
+                        THEN ${events.booleanTeamA} 
                       ELSE ${teamA.symbol} 
                     END`,
               symbol: teamA.symbol,
@@ -72,10 +74,12 @@ export async function GET(req: NextRequest) {
             },
             teamB: {
               name: sql`CASE 
-                WHEN ${events.handicapTeamA} IS NOT NULL 
-                  THEN ${teamB.symbol} || ' ' || ${events.handicapTeamB} 
-                ELSE ${teamB.symbol} 
-              END`,
+                      WHEN ${events.handicapTeamB} IS NOT NULL 
+                        THEN ${teamB.symbol} || ' ' || ${events.handicapTeamB} 
+                      WHEN ${events.booleanTeamB} IS NOT NULL
+                        THEN ${events.booleanTeamB} 
+                      ELSE ${teamB.symbol} 
+                    END`,
               symbol: teamB.symbol,
               img: teamB.url,
             },

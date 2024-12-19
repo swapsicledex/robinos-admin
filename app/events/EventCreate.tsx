@@ -23,6 +23,7 @@ export default function EventCreate() {
   const [category, setCategory] = useState("");
   const [tournament, setTournament] = useState(null);
   const [isFeatured, setIsFeatured] = useState(false);
+  const [isPrediction, setIsPrediction] = useState(false);
   const [conditions, setConditions] = useState<string[]>([""]);
   const [handicapA, setHandicapA] = useState<string | null>(null);
   const [handicapB, setHandicapB] = useState<string | null>(null);
@@ -42,6 +43,8 @@ export default function EventCreate() {
     useState<DropdownItem | null>(null);
   const [selectedTeamBItem, setSelectedTeamBItem] =
     useState<DropdownItem | null>(null);
+  const [booleanAItem, setBooleanAItem] = useState<DropdownItem | null>(null);
+  const [booleanBItem, setBooleanBItem] = useState<DropdownItem | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -100,17 +103,20 @@ export default function EventCreate() {
         code: eventName,
         saleEnd: saleEndTime,
         saleStart: saleStartTime,
-        isFeatured: isFeatured,
-        category: category,
+        isFeatured,
+        category,
         teamA: teamAId,
         teamB: teamBId,
         chainId: item.chainId,
         tokenAddress: item.tokenId,
         conditions:
           conditions.length === 1 && conditions[0] === "" ? null : conditions,
-        handicapA: handicapA,
-        handicapB: handicapB,
-        tournament: tournament,
+        handicapA,
+        handicapB,
+        tournament,
+        isPrediction,
+        booleanA: booleanAItem ? booleanAItem.label : null,
+        booleanB: booleanBItem ? booleanBItem.label : null,
       };
       try {
         await axios.post("/api/saveevent", data);
@@ -149,6 +155,9 @@ export default function EventCreate() {
     setSelectedTournamentItem(null);
     setSelectedTeamAItem(null);
     setSelectedTeamBItem(null);
+    setIsPrediction(false);
+    setBooleanAItem(null);
+    setBooleanBItem(null);
   };
 
   const handleEndTimeChange = (dateTime: Date) => {
@@ -390,6 +399,17 @@ export default function EventCreate() {
               }}
             />
           </label>
+
+          <label className="block mb-4 font-medium">
+            <input
+              type="checkbox"
+              name="is"
+              checked={isPrediction}
+              onChange={(e) => setIsPrediction(e.target.checked)}
+              className="mr-2"
+            />
+            Is Prediction
+          </label>
         </fieldset>
 
         {/* Team ASection */}
@@ -435,6 +455,24 @@ export default function EventCreate() {
               </div>
             </div>
           )}
+          {isPrediction && (
+            <div className="flex flex-row justify-between">
+              <div>
+                <label htmlFor="booleanA" className="block font-medium mb-1">
+                  Team A Name
+                </label>
+                <Dropdown
+                  apiEndpoint={`/api/getallbooleans?`}
+                  value={booleanAItem}
+                  placeholder="Select a boolean"
+                  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+                  onChange={(option: any) => {
+                    setBooleanAItem(option);
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </fieldset>
         {/* Team B Section */}
         <fieldset className="mb-6 border border-gray-200 rounded-lg p-4">
@@ -475,6 +513,24 @@ export default function EventCreate() {
                   value={handicapB ?? ""}
                   onChange={(e) => setHandicapB(e.target.value)}
                   className="border border-gray-300 rounded-lg p-2"
+                />
+              </div>
+            </div>
+          )}
+          {isPrediction && (
+            <div className="flex flex-row justify-between">
+              <div>
+                <label htmlFor="booleanB" className="block font-medium mb-1">
+                  Team B Name
+                </label>
+                <Dropdown
+                  apiEndpoint={`/api/getallbooleans?`}
+                  value={booleanBItem}
+                  placeholder="Select a boolean"
+                  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+                  onChange={(option: any) => {
+                    setBooleanBItem(option);
+                  }}
                 />
               </div>
             </div>

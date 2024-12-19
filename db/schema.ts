@@ -85,6 +85,9 @@ export const events = pgTable("events", {
   conditions: text("conditions").array(),
   handicapTeamA: varchar("handicap_team_a", { length: 31 }),
   handicapTeamB: varchar("handicap_team_b", { length: 31 }),
+  isPrediction: boolean("is_prediction").default(false),
+  booleanTeamA: varchar("boolean_team_a", { length: 63 }),
+  booleanTeamB: varchar("boolean_team_b", { length: 63 }),
 });
 
 // Tournaments table
