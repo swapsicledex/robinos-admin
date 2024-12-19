@@ -19,6 +19,9 @@ export async function POST(request: NextRequest) {
     handicapTeamA: body.handicapA,
     handicapTeamB: body.handicapB,
     tournament: body.tournament,
+    isPrediction: body.isPrediction,
+    booleanTeamA: body.booleanA,
+    booleanTeamB: body.booleanB,
   };
   const newEvent = await db.insert(events).values(event).returning();
   return Response.json(newEvent[0]);
