@@ -10,6 +10,7 @@ export async function POST(request: NextRequest) {
     category: body.category,
     tournament: body.tournament,
     url: `${process.env.NEXT_PUBLIC_CUSTOM_URL}/${body.imageName}`,
+    isPrediction: body.isPrediction,
   };
   console.log(
     "image url: ",

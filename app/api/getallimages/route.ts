@@ -26,7 +26,8 @@ export async function GET(req: NextRequest) {
     ].filter(Boolean); // Filter out undefined values directly in the array
 
     try {
-      const [totalCountResult, userData] = await Promise.all([
+      const [totalCountResult, userData, alwaysInclude] = await Promise.all([
+        // Fetch the total count of items
         db
           .select({ count: sql`COUNT(*)` })
           .from(players)
@@ -34,6 +35,7 @@ export async function GET(req: NextRequest) {
           .leftJoin(tournaments, eq(tournaments.id, players.tournament))
           .where(and(...conditions))
           .execute(),
+        // Fetch the paginated items
         db
           .select({
             id: players.id,
@@ -50,13 +52,36 @@ export async function GET(req: NextRequest) {
           .limit(parsedLimit)
           .offset(offset)
           .execute(),
+        // Fetch the items to always include
+        db
+          .select({
+            id: players.id,
+            name: players.name,
+            symbol: players.symbol,
+            url: players.url,
+            category: category.name,
+            tournament: tournaments.name,
+          })
+          .from(players)
+          .innerJoin(category, eq(category.id, players.category))
+          .leftJoin(tournaments, eq(tournaments.id, players.tournament))
+          .where(eq(players.isPrediction, true)) // Always include items with is_prediction = true
+          .execute(),
       ]);
 
       const totalItems = (totalCountResult[0]?.count as number) || 0;
       const totalPages = Math.ceil(totalItems / parsedLimit);
 
+      // Combine alwaysInclude and paginated data, ensuring no duplicates
+      const combinedData = [
+        ...userData,
+        ...alwaysInclude.filter(
+          (item) => !userData.some((userItem) => userItem.id === item.id)
+        ),
+      ];
+
       return NextResponse.json({
-        data: userData,
+        data: combinedData,
         metadata: {
           totalItems,
           totalPages,
