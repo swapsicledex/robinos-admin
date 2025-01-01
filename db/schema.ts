@@ -28,7 +28,6 @@ export const players = pgTable("players", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   tournament: integer("tournament").references(() => tournaments.id),
-  isPrediction: boolean("is_prediction").default(false),
 });
 
 // Chains Table

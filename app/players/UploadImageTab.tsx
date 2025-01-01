@@ -37,8 +37,6 @@ export default function UploadImageTab({
   const [selectedCategoryItem, setSelectedCategoryItem] =
     useState<DropdownItem | null>(null);
 
-  const [isPrediction, setIsPrediction] = useState(false);
-
   // const getAllCategoriesData = async () => {
   //   setIsLoading(true);
   //   const response = await axios.get("/api/getallcategories");
@@ -114,7 +112,6 @@ export default function UploadImageTab({
             symbol: symbol,
             category: selectedCategory,
             tournament: tournament,
-            isPrediction: isPrediction,
           });
           toast.success(`File uploaded successfully!`);
         }
@@ -127,18 +124,12 @@ export default function UploadImageTab({
         setSelectedCategoryItem(null);
         setSelectedTournamentItem(null);
         setSymbol("");
-        setIsPrediction(false);
       } catch (error) {
         console.error("Error uploading file:", error);
         toast.error("Error uploading file.");
       }
       setIsLoading(false);
     }
-  };
-
-  const handleIsPredictionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("inside handleIsPredictionChange");
-    setIsPrediction(e.target.checked);
   };
 
   async function uploadFileFromUrl(url: string, name: string) {
@@ -203,18 +194,7 @@ export default function UploadImageTab({
             required
           />
         </label>
-
-        <label className="block mb-4 font-medium">
-          <input
-            type="checkbox"
-            name="isPrediction"
-            checked={isPrediction}
-            onChange={(e) => handleIsPredictionChange(e)}
-            className="mr-2"
-          />
-          Is Prediction
-        </label>
-
+        {/* Category Dropdown */}
         <label className="block mb-2 font-medium">
           Category
           <Dropdown
@@ -243,7 +223,6 @@ export default function UploadImageTab({
             }}
           />
         </label>
-
         {/* File Upload */}
         <label className="block mb-2 font-medium">
           Upload File
