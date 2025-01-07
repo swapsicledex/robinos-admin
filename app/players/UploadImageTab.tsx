@@ -5,16 +5,25 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import LightPreview from "@/components/dashboard/ui/LightPreview";
 import DarkPreview from "@/components/dashboard/ui/DarkPreview";
-import { Player } from "@/db/schema";
 import Dropdown, { DropdownItem } from "@/components/dashboard/ui/Dropdown";
 
+export type EditItem = {
+  id: number;
+  name: string;
+  symbol: string;
+  url: string;
+  category: string;
+  categoryId: number;
+  tournament: string;
+  tournamentId: number;
+};
 export default function UploadImageTab({
   editMode,
   editItem,
   uploadHandler,
 }: {
   editMode: boolean;
-  editItem: Player | null;
+  editItem: EditItem | null;
   uploadHandler: () => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
@@ -24,6 +33,7 @@ export default function UploadImageTab({
   const [fileNameWithExtension, setFileNameWithExtension] = useState<
     string | null
   >(null);
+  const [isImageEdited, setIsImageEdited] = useState<boolean>(false);
   const [isEdited, setIsEdited] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -53,8 +63,16 @@ export default function UploadImageTab({
         setFileName(editItem.name);
         uploadFileFromUrl(editItem.url, editItem.name);
         setSymbol(editItem.symbol);
-        setSelectedCategory(editItem.category);
-        setTournament(editItem.tournament);
+        setSelectedCategory(editItem.categoryId);
+        setSelectedCategoryItem({
+          value: editItem.categoryId,
+          label: editItem.category,
+        });
+        setTournament(editItem.tournamentId);
+        setSelectedTournamentItem({
+          value: editItem.tournamentId,
+          label: editItem.tournament,
+        });
       } catch {}
       setIsLoading(false);
     }
@@ -77,6 +95,7 @@ export default function UploadImageTab({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsEdited(true);
+    setIsImageEdited(true);
     const file = e.target.files?.[0];
     // console.log("file: ", file);
     if (file) {
@@ -90,7 +109,25 @@ export default function UploadImageTab({
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (editMode && !isImageEdited) {
+      console.log("image not updated")
+      try {
+        await axios.put("/api/updateimage", {
+          id: editItem?.id,
+          name: fileName,
+          symbol: symbol,
+          category: selectedCategory,
+          tournament: tournament,
+        });
+        uploadHandler();
+        toast.success(`Details updated successfully!`);
+      } catch {
+        toast.error("Error updating file.");
+      }
+      return;
+    }
     if (file && preSignedUrl) {
+      console.log("image updated")
       setIsLoading(true);
       try {
         await axios.put(preSignedUrl, file, {
@@ -101,11 +138,13 @@ export default function UploadImageTab({
             id: editItem?.id,
             name: fileName,
             imageName: fileNameWithExtension,
+            symbol: symbol,
+            category: selectedCategory,
+            tournament: tournament,
           });
           toast.success(`Details updated successfully!`);
           uploadHandler();
         } else {
-          console.log("selectedCategory: ", selectedCategory);
           await axios.post("/api/saveimageurl", {
             name: fileName,
             imageName: fileNameWithExtension,
@@ -133,6 +172,7 @@ export default function UploadImageTab({
   };
 
   async function uploadFileFromUrl(url: string, name: string) {
+    console.log("uploadFileFromUrl: ",url)
     try {
       const response = await fetch(url);
 
@@ -188,7 +228,10 @@ export default function UploadImageTab({
           <input
             type="text"
             value={symbol}
-            onChange={(e) => setSymbol(e.target.value)}
+            onChange={(e) => {
+              setIsEdited(true);
+              setSymbol(e.target.value);
+            }}
             className="border border-gray-300 rounded-lg p-2 w-full mt-1"
             placeholder="Enter player symbol"
             required
@@ -203,6 +246,7 @@ export default function UploadImageTab({
             placeholder="Choose a category"
             // eslint-disable-next-line  @typescript-eslint/no-explicit-any
             onChange={(option: any) => {
+              setIsEdited(true);
               setSelectedCategoryItem(option);
               setSelectedCategory(option?.value);
             }}
@@ -218,6 +262,7 @@ export default function UploadImageTab({
             placeholder="Search and select a tournament"
             // eslint-disable-next-line  @typescript-eslint/no-explicit-any
             onChange={(option: any) => {
+              setIsEdited(true);
               setSelectedTournamentItem(option);
               setTournament(option.value);
             }}
@@ -231,7 +276,7 @@ export default function UploadImageTab({
             accept="image/*"
             onChange={handleFileChange}
             className="border border-gray-300 rounded-lg p-1 w-64"
-            required
+            required={!editMode}
           />
           {file && (
             <div className="mt-2 text-sm text-gray-600">
@@ -249,9 +294,15 @@ export default function UploadImageTab({
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={(editMode && !isEdited) || !file || !fileName}
+          disabled={
+            (editMode && !isEdited) ||
+            (!editMode && !file) ||
+            (!editMode && !fileName)
+          }
           className={`mt-4 py-2 px-4 rounded-lg w-full ${
-            (editMode && !isEdited) || !file || !fileName
+            (editMode && !isEdited) ||
+            (!editMode && !file) ||
+            (!editMode && !fileName)
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-blue-600 text-white hover:bg-blue-500"
           }`}

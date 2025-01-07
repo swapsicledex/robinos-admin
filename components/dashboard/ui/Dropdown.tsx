@@ -20,6 +20,7 @@ export type DropdownProps = {
   valueKey?: string;
   labelKey?: string;
   extraPropKey?: string;
+  required?: boolean;
 };
 
 const Dropdown: React.FC<DropdownProps> = ({
@@ -31,6 +32,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   valueKey = "id",
   labelKey = "name",
   extraPropKey,
+  required = true,
 }) => {
   const [page, setPage] = useState(1);
   const [isClient, setIsClient] = useState(false); // Track client-side rendering
@@ -61,7 +63,7 @@ const Dropdown: React.FC<DropdownProps> = ({
         // console.log("data: ", data);
 
         // Transform data from API into the format needed by the dropdown
-         // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line  @typescript-eslint/no-explicit-any
         const options = data?.data?.map((item: any) => ({
           value: item[`${valueKey}`],
           label: item[`${labelKey}`],
@@ -111,6 +113,7 @@ const Dropdown: React.FC<DropdownProps> = ({
       onInputChange={() => {
         setPage(1); // Reset page number to 1 when search query changes
       }} // Update search query
+      required={required}
       isClearable
       cacheUniqs={[apiEndpoint]} // Use `cacheUniqs` to uniquely identify the request cache
     />
