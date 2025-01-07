@@ -3,8 +3,10 @@ import { events, players, tokens, category, tournaments } from "@/db/schema";
 import { eq, gte, lte, and, aliasedTable, sql, desc } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { parse } from "querystring";
+// import redisClient from "@/lib/redis";
 
 export async function GET(req: NextRequest) {
+  // const cacheKey = "eventData";
   if (req.method === "GET") {
     const queryParams = parse(req.url?.split("?")[1] || "");
     const {
@@ -45,6 +47,11 @@ export async function GET(req: NextRequest) {
     ].filter(Boolean); // Filter out undefined values directly in the array
 
     try {
+      // Check if data is in the cache
+      // const cachedData = await redisClient.get(cacheKey);
+      // if (cachedData) {
+      //   return Response.json({ data: JSON.parse(cachedData), source: "cache" });
+      // }
       // Alias tables for team A and team B
       const teamA = aliasedTable(players, "teamA");
       const teamB = aliasedTable(players, "teamB");
@@ -112,8 +119,7 @@ export async function GET(req: NextRequest) {
           .then((result) => result[0]?.count || 0), // Fetch total count
       ]);
 
-      // Return the paginated response
-      return Response.json({
+      const newData = {
         data: eventData,
         metadata: {
           totalItems,
@@ -121,7 +127,13 @@ export async function GET(req: NextRequest) {
           totalPages: Math.ceil(totalItems / parsedLimit),
           itemsPerPage: parsedLimit,
         },
-      });
+      };
+
+      // Save data to cache with a TTL (e.g., 60 seconds)
+      // await redisClient.set(cacheKey, JSON.stringify(newData), { EX: 60 });
+
+      // Return the paginated response
+      return Response.json(newData);
     } catch (error) {
       console.error("Error fetching events:", error);
       return Response.json({ msg: "Failed to fetch events" });

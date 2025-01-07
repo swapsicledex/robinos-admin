@@ -43,7 +43,9 @@ export async function GET(req: NextRequest) {
             symbol: players.symbol,
             url: players.url,
             category: category.name,
+            categoryId: category.id,
             tournament: tournaments.name,
+            tournamentId: tournaments.id,
           })
           .from(players)
           .innerJoin(category, eq(category.id, players.category))

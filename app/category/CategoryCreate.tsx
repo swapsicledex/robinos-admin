@@ -108,6 +108,7 @@ export default function CategoryCreate() {
             accept="image/*"
             onChange={handleFileChange}
             className="border border-gray-300 rounded-lg p-1 w-64"
+            required
           />
           {file && (
             <div className="mt-2 text-sm text-gray-600">

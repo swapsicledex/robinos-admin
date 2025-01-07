@@ -129,8 +129,8 @@ export default function CategoryView() {
                         src={previewURL}
                         alt={editName}
                         className="h-12 w-12 object-cover rounded mt-2"
-                        height={12}
-                        width={12}
+                        height={48}
+                        width={48}
                       />
                     )}
                   </div>
@@ -139,8 +139,8 @@ export default function CategoryView() {
                     src={category.imageUrl}
                     alt={category.name}
                     className="h-12 w-12 object-cover rounded"
-                    height={12}
-                    width={12}
+                    height={48}
+                    width={48}
                   />
                 ) : null}
               </td>

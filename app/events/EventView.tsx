@@ -20,6 +20,16 @@ type FormData = {
   tournamentId: number;
 };
 
+type EventFilterParams = {
+  chainId: number | null;
+  search: string;
+  categoryId: number | null;
+  tournamentId: number | null;
+  page: number;
+  limit: number;
+  fromTime?: number;
+};
+
 export default function EventList() {
   const [events, setEvents] = useState<FormData[]>([]);
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
@@ -36,20 +46,29 @@ export default function EventList() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showLiveEventsOnly, setShowLiveEventsOnly] = useState<boolean>(false); // New state
 
   const fetchEvents = async () => {
     setIsLoading(true);
     try {
+      const params: EventFilterParams = {
+        chainId: chain,
+        search: searchQuery,
+        categoryId: category,
+        tournamentId: tournament,
+        page: currentPage,
+        limit: 50,
+      };
+      if (showLiveEventsOnly) {
+        params["fromTime"] = Math.floor(Date.now() / 1000);
+      }
       const { data } = await axios.get("/api/geteventdata", {
-        params: {
-          chainId: chain,
-          search: searchQuery,
-          categoryId: category,
-          tournamentId: tournament,
-          page: currentPage,
-        },
+        params: params,
       });
-      setEvents(data.data);
+
+      let filteredEvents = data.data;
+
+      setEvents(filteredEvents);
       setTotalPages(data.metadata.totalPages);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -58,19 +77,6 @@ export default function EventList() {
       setIsLoading(false);
     }
   };
-
-  // const fetchAuxiliaryData = async () => {
-  //   try {
-  //     const [categoriesData, tournamentsData] = await Promise.all([
-  //       axios.get("/api/getallcategories"),
-  //       axios.get("/api/getalltournaments"),
-  //     ]);
-  //     setCategories(categoriesData.data);
-  //     setTournaments(tournamentsData.data);
-  //   } catch (error) {
-  //     console.error("Error fetching auxiliary data:", error);
-  //   }
-  // };
 
   const updateEvent = async (
     updatedData: FormData,
@@ -99,33 +105,18 @@ export default function EventList() {
 
   useEffect(() => {
     fetchEvents();
-    // fetchAuxiliaryData();
-  }, [currentPage, searchQuery, category, tournament, chain]);
+  }, [
+    currentPage,
+    searchQuery,
+    category,
+    tournament,
+    chain,
+    showLiveEventsOnly,
+  ]); // Include `showLiveEventsOnly` in dependencies
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1); // Reset to first page when searching
-  };
-
-  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-  const handleCategoryChange = (option: any) => {
-    setCategory(option?.value);
-    setSelectedCategoryItem(option);
-    setCurrentPage(1); // Reset to first page when filtering
-  };
-
-  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-  const handleTournamentChange = (option: any) => {
-    setTournament(option?.value);
-    setSelectedTournamentItem(option);
-    setCurrentPage(1); // Reset to first page when filtering
-  };
-
-  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-  const handleChainChange = (option: any) => {
-    setChain(option?.value);
-    setSelectedChainItem(option);
-    setCurrentPage(1); // Reset to first page when filtering
+  const toggleLiveEventsFilter = () => {
+    setShowLiveEventsOnly((prev) => !prev);
+    setCurrentPage(1); // Reset to first page when toggling filter
   };
 
   return (
@@ -136,7 +127,7 @@ export default function EventList() {
         <input
           type="text"
           value={searchQuery}
-          onChange={handleSearch}
+          onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search events..."
           className="border border-gray-300 rounded-lg p-3 w-1/3"
         />
@@ -146,22 +137,39 @@ export default function EventList() {
           value={selectedChainItem}
           valueKey="chainId"
           // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-          onChange={(option: any) => handleChainChange(option)}
+          onChange={(option: any) => {
+            setChain(option?.value);
+            setSelectedChainItem(option);
+          }}
         />
         <Dropdown
           apiEndpoint="/api/getallcategories?"
           placeholder="Filter by Category"
           value={selectedCategoryItem}
           // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-          onChange={(option: any) => handleCategoryChange(option)}
+          onChange={(option: any) => {
+            setCategory(option?.value);
+            setSelectedCategoryItem(option);
+          }}
         />
         <Dropdown
           apiEndpoint={`/api/getalltournaments?categoryId=${category}`}
           placeholder="Filter by Tournament"
           value={selectedTournamentItem}
           // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-          onChange={(option: any) => handleTournamentChange(option)}
+          onChange={(option: any) => {
+            setTournament(option?.value);
+            setSelectedTournamentItem(option);
+          }}
         />
+        <button
+          onClick={toggleLiveEventsFilter}
+          className={`${
+            showLiveEventsOnly ? "bg-blue-500 text-white" : "bg-gray-300"
+          } px-2 py-2 rounded-md`}
+        >
+          {showLiveEventsOnly ? "Show All Events" : "Show Live Events"}
+        </button>
       </div>
 
       {isLoading ? (
@@ -173,7 +181,6 @@ export default function EventList() {
               <th className="border border-gray-300 p-2">Event Name</th>
               <th className="border border-gray-300 p-2">Category</th>
               <th className="border border-gray-300 p-2">Tournament</th>
-              <th className="border border-gray-300 p-2">Chain Id</th>
               <th className="border border-gray-300 p-2">Sale End</th>
               <th className="border border-gray-300 p-2">Actions</th>
             </tr>
@@ -195,9 +202,6 @@ export default function EventList() {
                   </td>
                   <td className="border border-gray-300 p-2">
                     {event.tournament}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {event.chainId}
                   </td>
                   <td className="border border-gray-300 p-2">
                     {new Date(event.saleEnd * 1000).toLocaleString()}
