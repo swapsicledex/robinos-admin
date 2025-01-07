@@ -66,9 +66,8 @@ export default function EventList() {
         params: params,
       });
 
-      let filteredEvents = data.data;
 
-      setEvents(filteredEvents);
+      setEvents(data?.data);
       setTotalPages(data.metadata.totalPages);
     } catch (error) {
       console.error("Error fetching events:", error);
