@@ -119,7 +119,7 @@ export default function EventCreate() {
       try {
         await axios.post("/api/saveevent", data);
         toast.success(`Event successfully created on ${item.chainId}!`);
-        handleReset();
+        await handleReset();
       } catch (error) {
         toast.error(`Event creating error`);
         console.log("Error in pusing event data to db: ", error);
@@ -129,7 +129,7 @@ export default function EventCreate() {
     setIsLoading(false);
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     setEventName("");
     setSaleEndTime(parseInt((Date.now() / 1000).toString()));
     setSaleStartTime(parseInt((Date.now() / 1000).toString()));
@@ -155,6 +155,9 @@ export default function EventCreate() {
     setSelectedTeamBItem(null);
     setBooleanAItem(null);
     setBooleanBItem(null);
+    setHandicapA("");
+    setHandicapB("");
+    setShowHandicap(false);
   };
 
   const handleEndTimeChange = (dateTime: Date) => {
@@ -396,7 +399,6 @@ export default function EventCreate() {
               }}
             />
           </label>
-
         </fieldset>
 
         {/* Team ASection */}
@@ -442,7 +444,6 @@ export default function EventCreate() {
               </div>
             </div>
           )}
-
         </fieldset>
         {/* Team B Section */}
         <fieldset className="mb-6 border border-gray-200 rounded-lg p-4">
@@ -491,7 +492,12 @@ export default function EventCreate() {
 
         <button
           type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg w-full"
+          className={`mt-4 py-2 px-4 rounded-lg w-full ${
+            isLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 text-white hover:bg-blue-500"
+          }`}
+          disabled={isLoading}
         >
           Create Event
         </button>
