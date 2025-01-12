@@ -119,8 +119,8 @@ export default function UploadImageTab({
           category: selectedCategory,
           tournament: tournament,
         });
-        uploadHandler();
         toast.success(`Details updated successfully!`);
+        uploadHandler();
       } catch {
         toast.error("Error updating file.");
       }

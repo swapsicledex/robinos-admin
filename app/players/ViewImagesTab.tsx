@@ -90,7 +90,7 @@ function ViewImagesTab() {
           className="border border-gray-300 rounded-lg p-2 w-1/3"
         />
         <Dropdown
-          apiEndpoint="/api/getallcategories"
+          apiEndpoint="/api/getallcategories?"
           placeholder="Select a category"
           value={selectedCategoryItem}
           // eslint-disable-next-line  @typescript-eslint/no-explicit-any

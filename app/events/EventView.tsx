@@ -33,12 +33,12 @@ type EventFilterParams = {
 export default function EventList() {
   const [events, setEvents] = useState<FormData[]>([]);
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
-  const [chain, setChain] = useState(null);
+  const [chain, setChain] = useState(40);
   const [category, setCategory] = useState(null);
   const [tournament, setTournament] = useState(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedChainItem, setSelectedChainItem] =
-    useState<DropdownItem | null>(null);
+    useState<DropdownItem | null>({ label: "Telos", value: 40 });
   const [selectedCategoryItem, setSelectedCategoryItem] =
     useState<DropdownItem | null>(null);
   const [selectedTournamentItem, setSelectedTournamentItem] =
@@ -65,7 +65,6 @@ export default function EventList() {
       const { data } = await axios.get("/api/geteventdata", {
         params: params,
       });
-
 
       setEvents(data?.data);
       setTotalPages(data.metadata.totalPages);
@@ -122,7 +121,7 @@ export default function EventList() {
     <div className="max-w-5xl mx-auto mt-10">
       <h2 className="text-2xl font-semibold mb-6">All Events</h2>
 
-      <div className="mb-6 flex space-x-4">
+      <div className="mb-6 flex space-x-3">
         <input
           type="text"
           value={searchQuery}
