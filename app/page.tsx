@@ -1,8 +1,42 @@
+"use client"
 // pages/index.tsx
 import Navbar from "@/components/dashboard/ui/Navbar";
 import Link from "next/link";
+import { useSession, signIn } from "next-auth/react";
+import users from "../authenticatedUsers.js";
 
 export default function Home() {
+  const { data: session } = useSession()
+
+  if (!session) {
+    return (
+      <div className="h-screen flex flex-col justify-center items-center gap-4">
+        <h1>Login with GitHub</h1>
+        <button
+          onClick={() => signIn("github")}
+          className="border py-1 px-2 border-black w-1/4 hover:bg-black hover:text-white transition text-xl"
+        >
+          Login
+        </button>
+      </div>
+    )
+  }
+
+  if (session && session.user?.email && !users.includes(session.user?.email)) {
+    return (
+      <div className="h-screen flex flex-col justify-center items-center gap-4">
+        <h1>Sorry! You are not an Authenticated User</h1>
+        <p className="text-xl">Please login with an Authenticated Account</p>
+        <button
+          onClick={() => signIn("github")}
+          className="border py-1 px-2 border-black w-1/4 hover:bg-black hover:text-white transition text-xl"
+        >
+          Login
+        </button>
+      </div>
+    )
+  }
+
   return (
     <>
       <Navbar />

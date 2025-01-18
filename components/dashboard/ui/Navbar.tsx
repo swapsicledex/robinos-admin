@@ -1,9 +1,14 @@
+"use client"
 // components/Navbar.tsx
 import Link from "next/link";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useSession, signOut } from "next-auth/react";
+import Image from "next/image";
 
 const Navbar = () => {
+  const { data: session } = useSession()
+  
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <ToastContainer position="bottom-left" autoClose={3000} theme="colored" />
@@ -52,6 +57,20 @@ const Navbar = () => {
             >
               Tournaments
             </Link>
+          </div>
+
+          <div className="flex gap-4">
+            <div className="flex gap-2">
+              <p>{session?.user?.name}</p>
+              <Image
+                src={session?.user?.image || ""}
+                alt=""
+                height={25}
+                width={25}
+                className="rounded-full"
+              />
+            </div>
+            <button onClick={() => signOut()}>Logout</button>
           </div>
         </div>
       </div>
