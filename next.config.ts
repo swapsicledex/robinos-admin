@@ -3,7 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
-    domains: ['tarangmehta.xyz'],
+    domains: [
+      'tarangmehta.xyz',
+      'avatars.githubusercontent.com'
+    ],
   },
   async headers() {
     return [
