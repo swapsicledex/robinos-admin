@@ -61,14 +61,14 @@ const Navbar = () => {
 
           <div className="flex gap-4">
             <div className="flex gap-2">
-              <p>{session?.user?.name}</p>
-              <Image
-                src={session?.user?.image || ""}
+              <p>{session?.user?.name || ""}</p>
+              {session?.user?.image && <Image
+                src={session?.user?.image}
                 alt=""
                 height={25}
                 width={25}
                 className="rounded-full"
-              />
+              />}
             </div>
             <button onClick={() => signOut()}>Logout</button>
           </div>
