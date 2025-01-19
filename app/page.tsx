@@ -3,10 +3,36 @@
 import Navbar from "@/components/dashboard/ui/Navbar";
 import Link from "next/link";
 import { useSession, signIn } from "next-auth/react";
-import users from "../authenticatedUsers.js";
+import { getAdminList } from "@/components/dashboard/hooks/adminList.js";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const { data: session } = useSession()
+  const [adminList, setAdminList] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    getAdminList().then(data => {
+      if (data) {
+        const temp: string[] = [];
+        data.forEach(item => {
+          temp.push(item.email);
+        });
+        setAdminList(temp);;
+      }
+    }).finally(() => {
+      setLoading(false);
+    });
+  }, []);
+
+
+  if (loading) {
+    return (
+      <main className="flex justify-center items-center h-screen">
+        <div className="loader"></div>
+      </main>
+    )
+  }
 
   if (!session) {
     return (
@@ -22,7 +48,7 @@ export default function Home() {
     )
   }
 
-  if (session && session.user?.email && !users.includes(session.user?.email)) {
+  if (session && session.user?.email && !adminList.includes(session.user?.email)) {
     return (
       <div className="h-screen flex flex-col justify-center items-center gap-4">
         <h1>Sorry! You are not an Authenticated User</h1>
