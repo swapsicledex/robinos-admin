@@ -1,19 +1,17 @@
-import { defineConfig } from 'drizzle-kit';
+import { defineConfig } from "drizzle-kit";
 
 export default defineConfig({
-  schema: './db/schema.ts',
-  out: './drizzle',
-  dialect: 'postgresql',
+  schema: "./db/schema.ts",
+  out: "./drizzle",
+  dialect: "postgresql",
   migrations: {
-    prefix: 'none'
+    prefix: "none",
   },
   dbCredentials: {
     host: process.env.DB_HOST!,
+    port: Number(process.env.DB_PORT!),
     user: process.env.DB_USER!,
     password: process.env.DB_PASSWORD!,
     database: process.env.DB_NAME!,
-    ssl: {
-      rejectUnauthorized: false, // Accepts any SSL certificate, required for SSL mode
-    },
   },
 });

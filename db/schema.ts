@@ -7,7 +7,12 @@ import {
   timestamp,
   boolean,
   bigint,
+  numeric,
+  uniqueIndex,
+  pgEnum,
 } from "drizzle-orm/pg-core";
+
+export const networkEnum = pgEnum("network", ["taiko", "telos", "mantle"]);
 
 // Category Table
 export const category = pgTable("category", {
@@ -85,6 +90,7 @@ export const events = pgTable("events", {
   conditions: text("conditions").array(),
   handicapTeamA: varchar("handicap_team_a", { length: 31 }),
   handicapTeamB: varchar("handicap_team_b", { length: 31 }),
+  network: networkEnum("network").notNull(),
 });
 
 // Tournaments table
@@ -94,6 +100,51 @@ export const tournaments = pgTable("tournaments", {
   name: varchar("name", { length: 63 }).notNull(),
   imageUrl: varchar("image_url", { length: 127 }),
 });
+
+export const robinosEvents = pgTable(
+  "robinos_events",
+  {
+    id: serial("id").primaryKey(),
+    code: varchar("code", { length: 255 }).notNull(),
+    saleEnd: bigint("sale_end", { mode: "number" }).notNull(),
+    saleStart: bigint("sale_start", { mode: "number" }).default(0),
+    isDeployed: boolean("is_deployed").default(false),
+    isFeatured: boolean("is_featured").notNull(),
+    chainId: integer("chain_id")
+      .references(() => chains.chainId)
+      .notNull(),
+    teamA: integer("team_a")
+      .references(() => players.id)
+      .notNull(),
+    teamB: integer("team_b")
+      .references(() => players.id)
+      .notNull(),
+    tokenAddress: integer("token_address")
+      .references(() => tokens.id)
+      .notNull(),
+    category: integer("category")
+      .references(() => category.id)
+      .notNull(),
+    tournament: integer("tournament").references(() => tournaments.id),
+    conditions: text("conditions").array(),
+    handicapTeamA: varchar("handicap_team_a", { length: 31 }),
+    handicapTeamB: varchar("handicap_team_b", { length: 31 }),
+    predictionNetwork: networkEnum("prediction_network").notNull(),
+    totalDepositA: bigint("total_deposit_a", { mode: "number" }),
+    totalDepositB: bigint("total_deposit_b", { mode: "number" }),
+    isRefund: boolean("is_refund"),
+    isCancelled: boolean("is_cancelled"),
+    isReward: boolean("is_reward"),
+    hasWinner: boolean("has_winner"),
+    winnerIndex: boolean("winner_index"),
+  },
+  (table) => ({
+    uniqueCodeNetwork: uniqueIndex("unique_constraint_name").on(
+      table.code,
+      table.predictionNetwork
+    ),
+  })
+);
 
 export type Player = typeof players.$inferSelect;
 export type NewPlayer = typeof players.$inferInsert;

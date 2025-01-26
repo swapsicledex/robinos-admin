@@ -70,10 +70,17 @@ export async function GET(req: NextRequest) {
       });
     } catch (error) {
       console.error("Error fetching players:", error);
-      return NextResponse.json(
-        { msg: "Failed to fetch players" },
-        { status: 500 }
-      );
+      return NextResponse.json({
+        msg: "Failed to fetch players",
+        status: 500,
+        data: [],
+        metadata: {
+          totalItems: 0,
+          totalPages: 0,
+          currentPage: parsedPage,
+          itemsPerPage: parsedLimit,
+        },
+      });
     }
   }
 }
