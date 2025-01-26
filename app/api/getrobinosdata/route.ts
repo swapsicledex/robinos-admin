@@ -6,7 +6,7 @@ import {
   tournaments,
   robinosEvents,
 } from "@/db/schema";
-import { eq, gte, lte, and, aliasedTable, sql, desc, asc } from "drizzle-orm";
+import { eq, gte, lte, and, aliasedTable, sql, desc } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { parse } from "querystring";
 
@@ -54,6 +54,7 @@ export async function GET(req: NextRequest) {
       search ? sql`${robinosEvents.code} ILIKE ${`%${search}%`}` : undefined,
     ].filter(Boolean); // Filter out undefined values directly in the array
 
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     const sortColumn: any =
       robinosEvents[sortBy as keyof typeof robinosEvents] ??
       robinosEvents.saleEnd; // Fallback to saleEnd
