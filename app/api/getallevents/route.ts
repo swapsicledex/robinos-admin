@@ -48,10 +48,17 @@ export async function GET(req: NextRequest) {
       });
     } catch (error) {
       console.error("Error fetching events:", error);
-      return NextResponse.json(
-        { msg: "Failed to fetch events" },
-        { status: 500 }
-      );
+      return NextResponse.json({
+        msg: "Failed to fetch events",
+        status: 500,
+        data: [],
+        metadata: {
+          totalItems: 0,
+          totalPages: 0,
+          currentPage: parsedPage,
+          itemsPerPage: parsedLimit,
+        },
+      });
     }
   }
 

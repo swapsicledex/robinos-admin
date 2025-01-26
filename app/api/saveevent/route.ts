@@ -19,6 +19,12 @@ export async function POST(request: NextRequest) {
     handicapTeamA: body.handicapA,
     handicapTeamB: body.handicapB,
     tournament: body.tournament,
+    network:
+      body.chainId == 40
+        ? "telos"
+        : body.chainId == 167000
+        ? "taiko"
+        : "mantle"
   };
   const newEvent = await db.insert(events).values(event).returning();
   return Response.json(newEvent[0]);

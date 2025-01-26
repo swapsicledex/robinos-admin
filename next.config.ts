@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   images: {
     domains: [
       'tarangmehta.xyz',
+      'minio-xooswkocgwkgs80ko8osgog0.89.58.57.28.sslip.io',
       'avatars.githubusercontent.com'
     ],
   },

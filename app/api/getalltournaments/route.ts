@@ -58,10 +58,17 @@ export async function GET(req: NextRequest) {
       });
     } catch (error) {
       console.error("Error fetching tournaments:", error);
-      return NextResponse.json(
-        { msg: "Failed to fetch tournaments" },
-        { status: 500 }
-      );
+      return NextResponse.json({
+        msg: "Failed to fetch tournaments",
+        status: 500,
+        data: [],
+        metadata: {
+          totalItems: 0,
+          totalPages: 0,
+          currentPage: parsedPage,
+          itemsPerPage: parsedLimit,
+        },
+      });
     }
   }
 

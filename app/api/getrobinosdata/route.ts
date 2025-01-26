@@ -1,12 +1,16 @@
 import { db } from "@/db/drizzle";
-import { events, players, tokens, category, tournaments } from "@/db/schema";
+import {
+  players,
+  tokens,
+  category,
+  tournaments,
+  robinosEvents,
+} from "@/db/schema";
 import { eq, gte, lte, and, aliasedTable, sql, desc } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { parse } from "querystring";
-// import redisClient from "@/lib/redis";
 
 export async function GET(req: NextRequest) {
-  // const cacheKey = "eventData";
   if (req.method === "GET") {
     const queryParams = parse(req.url?.split("?")[1] || "");
     const {
@@ -19,6 +23,8 @@ export async function GET(req: NextRequest) {
       search,
       limit = 10,
       page = 1,
+      sortBy = "saleEnd",
+      sortDir = "desc",
     } = queryParams;
 
     // if (!chainId) {
@@ -37,21 +43,24 @@ export async function GET(req: NextRequest) {
 
     // Building the conditions directly in the query to avoid extra filtering
     const conditions = [
-      chainId ? eq(events.chainId, Number(chainId)) : undefined,
-      categoryId ? eq(events.category, Number(categoryId)) : undefined,
-      tournamentId ? eq(events.tournament, Number(tournamentId)) : undefined,
-      featuredValue === "true" ? eq(events.isFeatured, true) : undefined,
-      gte(events.saleEnd, Number(fromTimeValue)),
-      lte(events.saleEnd, Number(toTimeValue)),
-      search ? sql`${events.code} ILIKE ${`%${search}%`}` : undefined,
+      chainId ? eq(robinosEvents.chainId, Number(chainId)) : undefined,
+      categoryId ? eq(robinosEvents.category, Number(categoryId)) : undefined,
+      tournamentId
+        ? eq(robinosEvents.tournament, Number(tournamentId))
+        : undefined,
+      featuredValue === "true" ? eq(robinosEvents.isFeatured, true) : undefined,
+      gte(robinosEvents.saleEnd, Number(fromTimeValue)),
+      lte(robinosEvents.saleEnd, Number(toTimeValue)),
+      search ? sql`${robinosEvents.code} ILIKE ${`%${search}%`}` : undefined,
     ].filter(Boolean); // Filter out undefined values directly in the array
 
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    const sortColumn: any =
+      robinosEvents[sortBy as keyof typeof robinosEvents] ??
+      robinosEvents.saleEnd; // Fallback to saleEnd
+    const sortOrder = sortDir === "asc" ? sql`` : desc(sortColumn);
+
     try {
-      // Check if data is in the cache
-      // const cachedData = await redisClient.get(cacheKey);
-      // if (cachedData) {
-      //   return Response.json({ data: JSON.parse(cachedData), source: "cache" });
-      // }
       // Alias tables for team A and team B
       const teamA = aliasedTable(players, "teamA");
       const teamB = aliasedTable(players, "teamB");
@@ -60,18 +69,18 @@ export async function GET(req: NextRequest) {
       const [eventData, totalItems] = await Promise.all([
         db
           .select({
-            id: events.id,
-            eventCode: events.code,
-            saleEnd: events.saleEnd,
-            conditions: events.conditions,
-            handicapTeamA: events.handicapTeamA,
-            handicapTeamB: events.handicapTeamB,
+            id: robinosEvents.id,
+            eventCode: robinosEvents.code,
+            saleEnd: robinosEvents.saleEnd,
+            conditions: robinosEvents.conditions,
+            handicapTeamA: robinosEvents.handicapTeamA,
+            handicapTeamB: robinosEvents.handicapTeamB,
             category: category.name,
             tournament: tournaments.name,
             teamA: {
               name: sql`CASE 
-                      WHEN ${events.handicapTeamA} IS NOT NULL 
-                        THEN ${teamA.symbol} || ' ' || ${events.handicapTeamA} 
+                      WHEN ${robinosEvents.handicapTeamA} IS NOT NULL 
+                        THEN ${teamA.symbol} || ' ' || ${robinosEvents.handicapTeamA} 
                       ELSE ${teamA.symbol} 
                     END`,
               symbol: teamA.symbol,
@@ -79,8 +88,8 @@ export async function GET(req: NextRequest) {
             },
             teamB: {
               name: sql`CASE 
-                      WHEN ${events.handicapTeamB} IS NOT NULL 
-                        THEN ${teamB.symbol} || ' ' || ${events.handicapTeamB} 
+                      WHEN ${robinosEvents.handicapTeamB} IS NOT NULL 
+                        THEN ${teamB.symbol} || ' ' || ${robinosEvents.handicapTeamB} 
                       ELSE ${teamB.symbol} 
                     END`,
               symbol: teamB.symbol,
@@ -89,31 +98,38 @@ export async function GET(req: NextRequest) {
             standardTokenAddress: tokens.address,
             tokenName: tokens.symbol,
             tokenDecimal: tokens.decimal,
-            chainId: events.chainId,
-            isFeatured: events.isFeatured,
-            categoryId: events.category,
-            tournamentId: events.tournament,
+            chainId: robinosEvents.chainId,
+            isFeatured: robinosEvents.isFeatured,
+            categoryId: robinosEvents.category,
+            tournamentId: robinosEvents.tournament,
+            totalDepositA: robinosEvents.totalDepositA,
+            totalDepositB: robinosEvents.totalDepositB,
+            isRefund: robinosEvents.isRefund,
+            isCancelled: robinosEvents.isCancelled,
+            isReward: robinosEvents.isReward,
+            hasWinner: robinosEvents.hasWinner,
+            winnerIndex: robinosEvents.winnerIndex,
           })
-          .from(events)
-          .innerJoin(teamA, eq(teamA.id, events.teamA)) // Join team A
-          .innerJoin(teamB, eq(teamB.id, events.teamB)) // Join team B
-          .innerJoin(tokens, eq(tokens.id, events.tokenAddress)) // Join tokens
-          .innerJoin(category, eq(category.id, events.category)) // Join category
-          .leftJoin(tournaments, eq(tournaments.id, events.tournament)) // Join tournaments
+          .from(robinosEvents)
+          .innerJoin(teamA, eq(teamA.id, robinosEvents.teamA)) // Join team A
+          .innerJoin(teamB, eq(teamB.id, robinosEvents.teamB)) // Join team B
+          .innerJoin(tokens, eq(tokens.id, robinosEvents.tokenAddress)) // Join tokens
+          .innerJoin(category, eq(category.id, robinosEvents.category)) // Join category
+          .leftJoin(tournaments, eq(tournaments.id, robinosEvents.tournament)) // Join tournaments
           .where(and(...conditions)) // Apply all conditions
-          .orderBy(desc(events.saleEnd))
+          .orderBy(sortOrder)
           .limit(parsedLimit)
           .offset(offset)
           .execute(),
 
         db
           .select({ count: sql<number>`COUNT(*)` })
-          .from(events)
-          .innerJoin(teamA, eq(teamA.id, events.teamA))
-          .innerJoin(teamB, eq(teamB.id, events.teamB))
-          .innerJoin(tokens, eq(tokens.id, events.tokenAddress))
-          .innerJoin(category, eq(category.id, events.category))
-          .leftJoin(tournaments, eq(tournaments.id, events.tournament))
+          .from(robinosEvents)
+          .innerJoin(teamA, eq(teamA.id, robinosEvents.teamA))
+          .innerJoin(teamB, eq(teamB.id, robinosEvents.teamB))
+          .innerJoin(tokens, eq(tokens.id, robinosEvents.tokenAddress))
+          .innerJoin(category, eq(category.id, robinosEvents.category))
+          .leftJoin(tournaments, eq(tournaments.id, robinosEvents.tournament))
           .where(and(...conditions)) // Apply all conditions
           .execute()
           .then((result) => result[0]?.count || 0), // Fetch total count
