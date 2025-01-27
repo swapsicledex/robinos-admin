@@ -6,7 +6,7 @@ import {
   tournaments,
   robinosEvents,
 } from "@/db/schema";
-import { eq, gte, lte, and, aliasedTable, sql, desc } from "drizzle-orm";
+import { eq, gte, lte, and, aliasedTable, sql, desc, asc } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { parse } from "querystring";
 
@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
     const sortColumn: any =
       robinosEvents[sortBy as keyof typeof robinosEvents] ??
       robinosEvents.saleEnd; // Fallback to saleEnd
-    const sortOrder = sortDir === "asc" ? sql`` : desc(sortColumn);
+    const sortOrder = sortDir === "asc" ? asc(sortColumn) : desc(sortColumn);
 
     try {
       // Alias tables for team A and team B
