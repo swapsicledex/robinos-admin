@@ -146,6 +146,14 @@ export const robinosEvents = pgTable(
   })
 );
 
+export const stakedEvents = pgTable("staked_events", {
+  predictionCode: varchar("prediction_code", { length: 255 }).notNull(),
+  network: networkEnum("network").notNull(),
+  user: varchar("user", { length: 31 }).notNull(),
+  userDepositA: bigint("user_deposit_a", { mode: "number" }),
+  userDepositB: bigint("user_deposit_b", { mode: "number" }),
+});
+
 export type Player = typeof players.$inferSelect;
 export type NewPlayer = typeof players.$inferInsert;
 export type Event = typeof events.$inferSelect;
