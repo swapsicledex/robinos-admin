@@ -55,9 +55,7 @@ export async function GET(req: NextRequest) {
 
     // Building the conditions directly in the query to avoid extra filtering
     const conditions = [
-      user
-        ? eq(sql`LOWER(${stakedEvents.user})`, user.toString().toLowerCase())
-        : undefined,
+      user ? eq(stakedEvents.user, user.toString()) : undefined,
       chainId ? eq(robinosEvents.chainId, Number(chainId)) : undefined,
       categoryId ? eq(robinosEvents.category, Number(categoryId)) : undefined,
       tournamentId
