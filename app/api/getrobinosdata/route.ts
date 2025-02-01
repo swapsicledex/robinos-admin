@@ -17,6 +17,7 @@ export async function GET(req: NextRequest) {
       chainId,
       categoryId,
       tournamentId,
+      tokenId,
       fromTime,
       toTime,
       featured,
@@ -45,6 +46,7 @@ export async function GET(req: NextRequest) {
     const conditions = [
       chainId ? eq(robinosEvents.chainId, Number(chainId)) : undefined,
       categoryId ? eq(robinosEvents.category, Number(categoryId)) : undefined,
+      tokenId ? eq(robinosEvents.tokenAddress, Number(tokenId)) : undefined,
       tournamentId
         ? eq(robinosEvents.tournament, Number(tournamentId))
         : undefined,

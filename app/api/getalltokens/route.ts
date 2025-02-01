@@ -39,7 +39,8 @@ export async function GET(req: NextRequest) {
           name: tokens.name,
           symbol: tokens.symbol,
           address: tokens.address,
-          chainId: chains.name,
+          chainId: tokens.chainId,
+          chainName:chains.name,
           imageUrl: tokens.imageUrl,
           decimal: tokens.decimal,
         })

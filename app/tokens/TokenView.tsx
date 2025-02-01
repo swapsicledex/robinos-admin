@@ -1,9 +1,9 @@
-import { Token } from "@/db/schema";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { TokenResponse } from "../types/TokenResponse";
 
 export default function TokenView() {
-  const [allTokens, setAllTokens] = useState<Token[]>([]);
+  const [allTokens, setAllTokens] = useState<TokenResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const getAllTokensData = async () => {
     setIsLoading(true);
@@ -43,7 +43,7 @@ export default function TokenView() {
               allTokens.map((token) => (
                 <tr key={token.id} className="border-b hover:bg-gray-50">
                   <td className="p-4 text-gray-800">{token.symbol}</td>
-                  <td className="p-4 text-gray-800">{token.chainId}</td>
+                  <td className="p-4 text-gray-800">{token.chainName}</td>
                   <td className="p-4 text-gray-800">{token.decimal}</td>
                 </tr>
               ))

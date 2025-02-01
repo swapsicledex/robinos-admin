@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
       chainId,
       categoryId,
       tournamentId,
+      tokenId,
       fromTime,
       toTime,
       featured,
@@ -39,6 +40,7 @@ export async function GET(req: NextRequest) {
     const conditions = [
       chainId ? eq(events.chainId, Number(chainId)) : undefined,
       categoryId ? eq(events.category, Number(categoryId)) : undefined,
+      tokenId ? eq(events.tokenAddress, Number(tokenId)) : undefined,
       tournamentId ? eq(events.tournament, Number(tournamentId)) : undefined,
       featuredValue === "true" ? eq(events.isFeatured, true) : undefined,
       gte(events.saleEnd, Number(fromTimeValue)),
