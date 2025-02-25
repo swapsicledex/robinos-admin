@@ -152,6 +152,11 @@ export default function ChainAdd() {
           Chain ID
           <input
             type="number"
+            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+              if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+                e.preventDefault();
+              }
+            }}
             name="chainId"
             value={formData.chainId}
             onChange={handleChange}

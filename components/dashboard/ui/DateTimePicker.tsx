@@ -100,6 +100,12 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
     updateDateTime(initialDateTime);
   }, []);
 
+  const disableArrowKeys = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+      e.preventDefault();
+    }
+  };
+
   return (
     <div className="p-4 rounded-md w-full max-w-3xl my-4 border border-gray-200 rounded-lg">
       <div className="flex items-center space-x-4 mb-4">
@@ -107,6 +113,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           <label className="block text-sm font-medium">Year</label>
           <input
             type="number"
+            onKeyDown={disableArrowKeys}
             value={dateTime.year}
             onChange={(e) => handleChange("year", e.target.value)}
             placeholder="YYYY"
@@ -117,6 +124,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           <label className="block text-sm font-medium">Month</label>
           <input
             type="number"
+            onKeyDown={disableArrowKeys}
             value={dateTime.month}
             onChange={(e) => handleChange("month", e.target.value)}
             placeholder="MM"
@@ -129,6 +137,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           <label className="block text-sm font-medium">Day</label>
           <input
             type="number"
+            onKeyDown={disableArrowKeys}
             value={dateTime.day}
             onChange={(e) => handleChange("day", e.target.value)}
             placeholder="DD"
@@ -141,6 +150,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           <label className="block text-sm font-medium">Hour</label>
           <input
             type="number"
+            onKeyDown={disableArrowKeys}
             value={dateTime.hour}
             onChange={(e) => handleChange("hour", e.target.value)}
             placeholder="HH"
@@ -153,6 +163,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           <label className="block text-sm font-medium">Minutes</label>
           <input
             type="number"
+            onKeyDown={disableArrowKeys}
             value={dateTime.minute}
             onChange={(e) => handleChange("minute", e.target.value)}
             placeholder="MM"
@@ -165,6 +176,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           <label className="block text-sm font-medium">Seconds</label>
           <input
             type="number"
+            onKeyDown={disableArrowKeys}
             value={dateTime.second}
             onChange={(e) => handleChange("second", e.target.value)}
             placeholder="SS"
@@ -178,6 +190,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
         <label className="block text-sm font-medium">Timestamp</label>
         <input
           type="number"
+          onKeyDown={disableArrowKeys}
           value={timestamp}
           onChange={(e) => handleTimestampChange(e.target.value)}
           placeholder="Timestamp (seconds)"
