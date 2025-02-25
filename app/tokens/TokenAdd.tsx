@@ -156,6 +156,11 @@ export default function TokenAdd() {
         </label>
         <input
           type="number"
+          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+              if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+                e.preventDefault();
+              }
+            }}
           id="decimal"
           name="decimal"
           value={decimal}
