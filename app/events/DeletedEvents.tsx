@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Dropdown, { DropdownItem } from "@/components/dashboard/ui/Dropdown";
-import DateTimePicker from "@/components/dashboard/ui/DateTimePicker";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,7 +43,7 @@ type EventFilterParams = {
   deleted?: boolean;
 };
 
-export default function EventList() {
+export default function DeletedEvents() {
   const [events, setEvents] = useState<FormData[]>([]);
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
   const [chain, setChain] = useState(40);
@@ -72,7 +71,7 @@ export default function EventList() {
         tournamentId: tournament,
         page: currentPage,
         limit: 50,
-        deleted: false
+        deleted: true
       };
       if (showLiveEventsOnly) {
         params["fromTime"] = Math.floor(Date.now() / 1000);
@@ -91,34 +90,6 @@ export default function EventList() {
     }
   };
 
-  const updateEvent = async (
-    updatedData: FormData,
-    catId: number,
-    torId: number,
-    isDeleted: boolean
-  ) => {
-    try {
-      console.log("updatedData: ", updatedData);
-      await axios.put("/api/updateevent", {
-        id: updatedData.id,
-        code: updatedData.eventCode,
-        saleEnd: updatedData.saleEnd,
-        saleStart: updatedData.saleStart,
-        isFeatured: updatedData.isFeatured,
-        isDeleted,
-        category: catId,
-        conditions: updatedData.conditions,
-        tournament: torId,
-      });
-
-      toast.success(`Event ${isDeleted ? "Deleted" : "Updated"} Successfully`);
-
-      fetchEvents();
-    } catch (error) {
-      console.error("Error updating event:", error);
-      toast.error("Failed to update event.");
-    }
-  };
 
   useEffect(() => {
     fetchEvents();
@@ -134,6 +105,31 @@ export default function EventList() {
   const toggleLiveEventsFilter = () => {
     setShowLiveEventsOnly((prev) => !prev);
     setCurrentPage(1); // Reset to first page when toggling filter
+  };
+
+  const updateEvent = async (
+    updatedData: FormData,
+    catId: number,
+    torId: number
+  ) => {
+    try {
+      await axios.put("/api/updateevent", {
+        id: updatedData.id,
+        code: updatedData.eventCode,
+        saleEnd: updatedData.saleEnd,
+        saleStart: updatedData.saleStart,
+        isFeatured: updatedData.isFeatured,
+        isDeleted: false,
+        category: catId,
+        conditions: updatedData.conditions,
+        tournament: torId,
+      });
+      toast.success("Event Redeployed successfully!");
+      fetchEvents();
+    } catch (error) {
+      console.error("Error Redeploying event:", error);
+      toast.error("Failed to Redeploy event.");
+    }
   };
 
   return (
@@ -222,23 +218,10 @@ export default function EventList() {
                   <td className="border border-gray-300 p-2">
                     {new Date(event.saleEnd * 1000).toLocaleString()}
                   </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    {expandedRow === index ? "-" : "+"}
+                  <td className="border border-gray-300">
+                    <RedeployEvent event={event} onUpdate={updateEvent}/>
                   </td>
                 </tr>
-                {expandedRow === index && (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="border border-gray-300 p-4 bg-gray-50"
-                    >
-                      <EditEventForm
-                        event={event}
-                        onUpdate={updateEvent}
-                      />
-                    </td>
-                  </tr>
-                )}
               </React.Fragment>
             ))}
           </tbody>
@@ -270,205 +253,43 @@ export default function EventList() {
   );
 }
 
-function EditEventForm({
+function RedeployEvent({
   event,
   onUpdate
 }: {
   event: FormData;
-  onUpdate: (updatedData: FormData, catId: number, torId: number, isDeleted: boolean) => void;
+  onUpdate: (updatedData: FormData, catId:number, torId:number) => void;
 }) {
-  const [formData, setFormData] = useState<FormData>({
-    ...event,
-    saleStart: event.saleStart || null,
-  });
-
-  const [selectedCategoryItem, setSelectedCategoryItem] =
-    useState<DropdownItem | null>({
-      value: event.categoryId,
-      label: event.category,
-    });
-  const [selectedTournamentItem, setSelectedTournamentItem] =
-    useState<DropdownItem | null>({
-      value: event.tournamentId ?? "",
-      label: event.tournament ?? "",
-    });
-
-  const [selectedCategoryId, setSelectedCategoryId] = useState(
-    event.categoryId
-  );
-  const [selectedTournamentId, setSelectedTournamentId] = useState(
-    event.tournamentId
-  );
-
-  const handleInputChange = (
-    field: string,
-    value: string | number | boolean
-  ) => {
-    setFormData({ ...formData, [field]: value });
-  };
-
-  const handleConditionChange = (index: number, value: string) => {
-    const updatedConditions = [...formData.conditions];
-    updatedConditions[index] = value;
-    setFormData({ ...formData, conditions: updatedConditions });
-  };
-
-  const addCondition = () => {
-    setFormData({ ...formData, conditions: [...formData.conditions, ""] });
-  };
-
-  const removeCondition = (index: number) => {
-    const updatedConditions = formData.conditions.filter((_, i) => i !== index);
-    setFormData({ ...formData, conditions: updatedConditions });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onUpdate(formData, selectedCategoryId, selectedTournamentId, false);
-  };
-
-  const handleEventDeletion = () => {
-    onUpdate(formData, selectedCategoryId, selectedTournamentId, true);
+  
+  const handleEventRedeploy = () => {
+    onUpdate(event, event.categoryId, event.tournamentId);
   }
-
   return (
     <>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-2">
-          <label className="block font-medium">Event Code</label>
-          <input
-            type="text"
-            value={formData.eventCode}
-            onChange={(e) => handleInputChange("eventCode", e.target.value)}
-            className="border border-gray-300 rounded-lg p-3 w-full"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block font-medium">Sale Start Time</label>
-          <DateTimePicker
-            initialDateTime={
-              formData.saleStart ? new Date(formData.saleStart * 1000) : undefined
-            }
-            onDateTimeChange={(date) =>
-              handleInputChange("saleStart", Math.floor(date.getTime() / 1000))
-            }
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block font-medium">Sale End Time</label>
-          <DateTimePicker
-            initialDateTime={new Date(formData.saleEnd * 1000)}
-            onDateTimeChange={(date) =>
-              handleInputChange("saleEnd", Math.floor(date.getTime() / 1000))
-            }
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block font-medium">Category</label>
-          <Dropdown
-            apiEndpoint="/api/getallcategories?"
-            value={selectedCategoryItem}
-            placeholder="Select a category"
-            // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-            onChange={(option: any) => {
-              setSelectedCategoryItem(option);
-              handleInputChange("category", option?.label);
-              setSelectedCategoryId(option?.value);
-            }}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block font-medium">Tournament</label>
-          <Dropdown
-            apiEndpoint={`/api/getalltournaments?categoryId=${selectedCategoryId}`}
-            value={selectedTournamentItem}
-            placeholder="Select a tournament"
-            // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-            onChange={(option: any) => {
-              setSelectedTournamentItem(option);
-              handleInputChange("tournament", option?.label);
-              setSelectedTournamentId(option?.value);
-            }}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={formData.isFeatured}
-              onChange={(e) => handleInputChange("isFeatured", e.target.checked)}
-            />
-            <span className="font-medium">Featured Event</span>
-          </label>
-        </div>
-
-        <fieldset className="border border-gray-200 p-4 rounded-lg space-y-4">
-          <legend className="font-medium text-lg">Conditions</legend>
-          {formData?.conditions?.map((condition, index) => (
-            <div key={index} className="flex items-center space-x-2">
-              <input
-                type="text"
-                value={condition}
-                onChange={(e) => handleConditionChange(index, e.target.value)}
-                className="border border-gray-300 rounded-lg p-3 flex-1"
-              />
-              <button
-                type="button"
-                onClick={addCondition}
-                className="bg-green-500 text-white p-2 rounded-lg"
-              >
-                +
-              </button>
-              {formData.conditions.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeCondition(index)}
-                  className="bg-red-500 text-white p-2 rounded-lg"
-                >
-                  -
-                </button>
-              )}
-            </div>
-          ))}
-        </fieldset>
-
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-3 rounded-lg w-full"
-        >
-          Save Changes
-        </button>
-      </form>
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button
             variant="outline"
-            className="bg-red-600 text-white py-6 rounded-lg w-full mt-2"
-          >Delete</Button>
+            className="bg-green-600 text-white py-6 rounded-lg w-full mt-2"
+          >Redeploy</Button>
         </AlertDialogTrigger>
         <AlertDialogContent
           className="bg-white"
         >
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Delete {formData.eventCode}! <br />
-              Are you absolutely sure?
+              Redeploy {event.eventCode}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This action will delete the Event : {formData.eventCode}
+              This action will redeploy the Event : {event.eventCode}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-600 text-white hover:text-black"
-              onClick={handleEventDeletion}
-            >Delete</AlertDialogAction>
+              className="bg-green-600 text-white hover:text-black"
+              onClick={handleEventRedeploy}
+            >Redeploy</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
