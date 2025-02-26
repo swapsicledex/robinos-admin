@@ -4,6 +4,7 @@ import { Tabs, TabList, Tab, TabPanel } from "react-tabs";
 import Navbar from "@/components/dashboard/ui/Navbar";
 import EventCreate from "./EventCreate";
 import EventView from "./EventView";
+import DeletedEvents from "./DeletedEvents";
 
 const EventsPage = () => {
   return (
@@ -15,6 +16,7 @@ const EventsPage = () => {
           <TabList>
             <Tab>Create Event</Tab>
             <Tab>Manage Events</Tab>
+            <Tab>Deleted Events</Tab>
           </TabList>
 
           <TabPanel>
@@ -23,6 +25,10 @@ const EventsPage = () => {
 
           <TabPanel>
             <EventView />
+          </TabPanel>
+          
+          <TabPanel>
+            <DeletedEvents />
           </TabPanel>
         </Tabs>
       </div>

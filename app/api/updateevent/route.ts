@@ -13,6 +13,7 @@ export async function PUT(request: NextRequest) {
       saleEnd: body.saleEnd,
       saleStart: body.saleStart,
       isFeatured: body.isFeatured,
+      isDeleted: body.isDeleted,
       category: body.category,
       conditions: body.conditions,
       tournament: body.tournament,
