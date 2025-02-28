@@ -71,6 +71,7 @@ export const events = pgTable("events", {
   saleStart: bigint("sale_start", { mode: "number" }).default(0),
   isDeployed: boolean("is_deployed").default(false),
   isFeatured: boolean("is_featured").notNull(),
+  isDeleted: boolean("is_deleted").default(false),
   chainId: integer("chain_id")
     .references(() => chains.chainId)
     .notNull(),
@@ -110,6 +111,7 @@ export const robinosEvents = pgTable(
     saleStart: bigint("sale_start", { mode: "number" }).default(0),
     isDeployed: boolean("is_deployed").default(false),
     isFeatured: boolean("is_featured").notNull(),
+    isDeleted: boolean("is_deleted").default(false),
     chainId: integer("chain_id")
       .references(() => chains.chainId)
       .notNull(),

@@ -17,6 +17,7 @@ export async function GET(req: NextRequest) {
       fromTime,
       toTime,
       featured,
+      deleted,
       search,
       limit = 10,
       page = 1,
@@ -35,6 +36,8 @@ export async function GET(req: NextRequest) {
     const fromTimeValue = fromTime ?? currentTimestamp - 90 * 24 * 60 * 60; // 90 days back
     const toTimeValue = toTime ?? currentTimestamp + 90 * 24 * 60 * 60; // 90 days ahead
     const featuredValue = featured ?? "false";
+    const deletedValue = deleted ?? "false";
+
 
     // Building the conditions directly in the query to avoid extra filtering
     const conditions = [
@@ -43,10 +46,13 @@ export async function GET(req: NextRequest) {
       tokenId ? eq(events.tokenAddress, Number(tokenId)) : undefined,
       tournamentId ? eq(events.tournament, Number(tournamentId)) : undefined,
       featuredValue === "true" ? eq(events.isFeatured, true) : undefined,
+      deletedValue === "false" ? eq(events.isDeleted, false) : eq(events.isDeleted, true),
       gte(events.saleEnd, Number(fromTimeValue)),
       lte(events.saleEnd, Number(toTimeValue)),
       search ? sql`${events.code} ILIKE ${`%${search}%`}` : undefined,
     ].filter(Boolean); // Filter out undefined values directly in the array
+
+    console.log(conditions);
 
     try {
       // Check if data is in the cache
@@ -93,6 +99,7 @@ export async function GET(req: NextRequest) {
             tokenDecimal: tokens.decimal,
             chainId: events.chainId,
             isFeatured: events.isFeatured,
+            isDeleted: events.isDeleted,
             categoryId: events.category,
             tournamentId: events.tournament,
           })

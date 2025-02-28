@@ -50,6 +50,7 @@ export async function GET(req: NextRequest) {
       tournamentId
         ? eq(robinosEvents.tournament, Number(tournamentId))
         : undefined,
+      eq(robinosEvents.isDeleted, false),
       featuredValue === "true" ? eq(robinosEvents.isFeatured, true) : undefined,
       gte(robinosEvents.saleEnd, Number(fromTimeValue)),
       lte(robinosEvents.saleEnd, Number(toTimeValue)),
