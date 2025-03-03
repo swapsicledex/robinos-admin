@@ -12,7 +12,12 @@ import {
   pgEnum,
 } from "drizzle-orm/pg-core";
 
-export const networkEnum = pgEnum("network", ["taiko", "telos", "mantle"]);
+export const networkEnum = pgEnum("network", [
+  "taiko",
+  "telos",
+  "mantle",
+  "abstractTestnet",
+]);
 
 // Category Table
 export const category = pgTable("category", {

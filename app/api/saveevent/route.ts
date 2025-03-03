@@ -23,8 +23,10 @@ export async function POST(request: NextRequest) {
       body.chainId == 40
         ? "telos"
         : body.chainId == 167000
-        ? "taiko"
-        : "mantle"
+          ? "taiko"
+          : body.chainId == 5000
+            ? "mantle"
+            : "abstractTestnet",
   };
   const newEvent = await db.insert(events).values(event).returning();
   return Response.json(newEvent[0]);
