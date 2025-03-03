@@ -113,6 +113,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           <label className="block text-sm font-medium">Year</label>
           <input
             type="number"
+            onWheel={(e) => e.currentTarget.blur()}
             onKeyDown={disableArrowKeys}
             value={dateTime.year}
             onChange={(e) => handleChange("year", e.target.value)}
@@ -124,6 +125,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           <label className="block text-sm font-medium">Month</label>
           <input
             type="number"
+            onWheel={(e) => e.currentTarget.blur()}
             onKeyDown={disableArrowKeys}
             value={dateTime.month}
             onChange={(e) => handleChange("month", e.target.value)}
@@ -137,6 +139,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           <label className="block text-sm font-medium">Day</label>
           <input
             type="number"
+            onWheel={(e) => e.currentTarget.blur()}
             onKeyDown={disableArrowKeys}
             value={dateTime.day}
             onChange={(e) => handleChange("day", e.target.value)}
@@ -150,6 +153,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           <label className="block text-sm font-medium">Hour</label>
           <input
             type="number"
+            onWheel={(e) => e.currentTarget.blur()}
             onKeyDown={disableArrowKeys}
             value={dateTime.hour}
             onChange={(e) => handleChange("hour", e.target.value)}
@@ -163,6 +167,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           <label className="block text-sm font-medium">Minutes</label>
           <input
             type="number"
+            onWheel={(e) => e.currentTarget.blur()}
             onKeyDown={disableArrowKeys}
             value={dateTime.minute}
             onChange={(e) => handleChange("minute", e.target.value)}
@@ -176,6 +181,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           <label className="block text-sm font-medium">Seconds</label>
           <input
             type="number"
+            onWheel={(e) => e.currentTarget.blur()}
             onKeyDown={disableArrowKeys}
             value={dateTime.second}
             onChange={(e) => handleChange("second", e.target.value)}
@@ -195,6 +201,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           onChange={(e) => handleTimestampChange(e.target.value)}
           placeholder="Timestamp (seconds)"
           className="w-full px-2 py-1 border rounded"
+          onWheel={(e) => e.currentTarget.blur()}
         />
       </div>
     </div>
