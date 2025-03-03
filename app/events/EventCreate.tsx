@@ -11,10 +11,10 @@ import DateTimePicker from "@/components/dashboard/ui/DateTimePicker";
 export default function EventCreate() {
   const [eventName, setEventName] = useState("");
   const [saleEndTime, setSaleEndTime] = useState(
-    parseInt(Math.floor(Date.now() / 1000).toString())
+    Math.floor(Date.now() / 1000).toString()
   );
   const [saleStartTime, setSaleStartTime] = useState(
-    parseInt(Math.floor(Date.now() / 1000).toString())
+    Math.floor(Date.now() / 1000).toString()
   );
   const [teamAImage, setTeamAImage] = useState<string | null>(null);
   const [teamBImage, setTeamBImage] = useState<string | null>(null);
@@ -131,8 +131,8 @@ export default function EventCreate() {
 
   const handleReset = async () => {
     setEventName("");
-    setSaleEndTime(parseInt((Date.now() / 1000).toString()));
-    setSaleStartTime(parseInt((Date.now() / 1000).toString()));
+    setSaleEndTime(Math.floor(Date.now() / 1000).toString());
+    setSaleStartTime(Math.floor(Date.now() / 1000).toString());
     setTeamAImage(null);
     setTeamBImage(null);
     setCategory("");
@@ -160,12 +160,6 @@ export default function EventCreate() {
     setShowHandicap(false);
   };
 
-  const handleEndTimeChange = (dateTime: Date) => {
-    setSaleEndTime(Math.floor(dateTime.getTime() / 1000));
-  };
-  const handleStartTimeChange = (dateTime: Date) => {
-    setSaleStartTime(Math.floor(dateTime.getTime() / 1000));
-  };
 
   const handleConditionChange = (index: number, value: string) => {
     const updatedConditions = [...conditions];
@@ -247,14 +241,20 @@ export default function EventCreate() {
           <label className="block font-medium mb-2">
             Sale Start Time (Unix Timestamp)
           </label>
-          <DateTimePicker onDateTimeChange={handleStartTimeChange} />
+          <DateTimePicker
+            timestamp={saleStartTime}
+            setTimestamp={setSaleStartTime}
+          />
         </fieldset>
 
         <fieldset className="mb-6 border border-gray-200 rounded-lg p-4 mt-4">
           <label className="block font-medium mb-2">
             Sale End Time (Unix Timestamp)
           </label>
-          <DateTimePicker onDateTimeChange={handleEndTimeChange} />
+          <DateTimePicker
+            timestamp={saleEndTime}
+            setTimestamp={setSaleEndTime}
+          />
         </fieldset>
 
         <div className="mt-4 mb-2">

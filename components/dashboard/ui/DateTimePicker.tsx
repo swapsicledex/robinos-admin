@@ -9,26 +9,22 @@ type DateTime = {
 };
 
 type DateTimePickerProps = {
-  initialDateTime?: Date;
-  onDateTimeChange: (dateTime: Date) => void;
+  timestamp: string;
+  setTimestamp: (value: string) => void;
 };
 
 const DateTimePicker: React.FC<DateTimePickerProps> = ({
-  initialDateTime = new Date(),
-  onDateTimeChange,
+  timestamp,
+  setTimestamp,
 }) => {
   const [dateTime, setDateTime] = useState<DateTime>({
-    year: String(initialDateTime.getFullYear()),
-    month: String(initialDateTime.getMonth() + 1).padStart(2, "0"),
-    day: String(initialDateTime.getDate()).padStart(2, "0"),
-    hour: String(initialDateTime.getHours()).padStart(2, "0"),
-    minute: String(initialDateTime.getMinutes()).padStart(2, "0"),
-    second: String(initialDateTime.getSeconds()).padStart(2, "0"),
+    year: String(new Date().getFullYear()),
+    month: String(new Date().getMonth() + 1).padStart(2, "0"),
+    day: String(new Date().getDate()).padStart(2, "0"),
+    hour: String(new Date().getHours()).padStart(2, "0"),
+    minute: String(new Date().getMinutes()).padStart(2, "0"),
+    second: String(new Date().getSeconds()).padStart(2, "0"),
   });
-
-  const [timestamp, setTimestamp] = useState(
-    Math.floor(initialDateTime.getTime() / 1000).toString()
-  );
 
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   const debounce = (func: (...args: any[]) => void, delay: number) => {
@@ -50,7 +46,6 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
       second: String(newDate.getSeconds()).padStart(2, "0"),
     });
     setTimestamp(Math.floor(newDate.getTime() / 1000).toString());
-    onDateTimeChange(newDate);
   };
 
   const debouncedUpdateDateTime = useCallback(
@@ -93,12 +88,11 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
 
   const handleTimestampChange = (value: string) => {
     setTimestamp(value);
-    debouncedHandleTimestampChange(value);
   };
 
   useEffect(() => {
-    updateDateTime(initialDateTime);
-  }, []);
+    debouncedHandleTimestampChange(timestamp);
+  }, [timestamp]);
 
   const disableArrowKeys = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
