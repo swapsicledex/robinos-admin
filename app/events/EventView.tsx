@@ -15,8 +15,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 type FormData = {
   id: number;
@@ -24,7 +24,7 @@ type FormData = {
   chainId: number;
   isFeatured: boolean;
   isDeleted: boolean;
-  saleStart: number | null;
+  saleStart: number;
   saleEnd: number;
   category: string;
   tournament: string | null;
@@ -41,6 +41,7 @@ type EventFilterParams = {
   page: number;
   limit: number;
   fromTime?: number;
+  toTime?: number;
   deleted?: boolean;
 };
 
@@ -98,7 +99,6 @@ export default function EventList() {
     isDeleted: boolean
   ) => {
     try {
-      console.log("updatedData: ", updatedData);
       await axios.put("/api/updateevent", {
         id: updatedData.id,
         code: updatedData.eventCode,
@@ -181,8 +181,9 @@ export default function EventList() {
         />
         <button
           onClick={toggleLiveEventsFilter}
-          className={`${showLiveEventsOnly ? "bg-blue-500 text-white" : "bg-gray-300"
-            } px-2 py-2 rounded-md`}
+          className={`${
+            showLiveEventsOnly ? "bg-blue-500 text-white" : "bg-gray-300"
+          } px-2 py-2 rounded-md`}
         >
           {showLiveEventsOnly ? "Show All Events" : "Show Live Events"}
         </button>
@@ -232,10 +233,7 @@ export default function EventList() {
                       colSpan={6}
                       className="border border-gray-300 p-4 bg-gray-50"
                     >
-                      <EditEventForm
-                        event={event}
-                        onUpdate={updateEvent}
-                      />
+                      <EditEventForm event={event} onUpdate={updateEvent} />
                     </td>
                   </tr>
                 )}
@@ -272,14 +270,18 @@ export default function EventList() {
 
 function EditEventForm({
   event,
-  onUpdate
+  onUpdate,
 }: {
   event: FormData;
-  onUpdate: (updatedData: FormData, catId: number, torId: number, isDeleted: boolean) => void;
+  onUpdate: (
+    updatedData: FormData,
+    catId: number,
+    torId: number,
+    isDeleted: boolean
+  ) => void;
 }) {
   const [formData, setFormData] = useState<FormData>({
     ...event,
-    saleStart: event.saleStart || null,
   });
 
   const [selectedCategoryItem, setSelectedCategoryItem] =
@@ -304,7 +306,7 @@ function EditEventForm({
     field: string,
     value: string | number | boolean
   ) => {
-    setFormData({ ...formData, [field]: value });
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleConditionChange = (index: number, value: string) => {
@@ -329,7 +331,12 @@ function EditEventForm({
 
   const handleEventDeletion = () => {
     onUpdate(formData, selectedCategoryId, selectedTournamentId, true);
-  }
+  };
+
+  const handleSaleStartChange = (val: string) =>
+    handleInputChange("saleStart", val);
+  const handleSaleEndChange = (val: string) =>
+    handleInputChange("saleEnd", val);
 
   return (
     <>
@@ -347,22 +354,16 @@ function EditEventForm({
         <div className="space-y-2">
           <label className="block font-medium">Sale Start Time</label>
           <DateTimePicker
-            initialDateTime={
-              formData.saleStart ? new Date(formData.saleStart * 1000) : undefined
-            }
-            onDateTimeChange={(date) =>
-              handleInputChange("saleStart", Math.floor(date.getTime() / 1000))
-            }
+            timestamp={formData.saleStart?.toString()}
+            setTimestamp={handleSaleStartChange}
           />
         </div>
 
         <div className="space-y-2">
           <label className="block font-medium">Sale End Time</label>
           <DateTimePicker
-            initialDateTime={new Date(formData.saleEnd * 1000)}
-            onDateTimeChange={(date) =>
-              handleInputChange("saleEnd", Math.floor(date.getTime() / 1000))
-            }
+            timestamp={formData.saleEnd?.toString()}
+            setTimestamp={handleSaleEndChange}
           />
         </div>
 
@@ -401,7 +402,9 @@ function EditEventForm({
             <input
               type="checkbox"
               checked={formData.isFeatured}
-              onChange={(e) => handleInputChange("isFeatured", e.target.checked)}
+              onChange={(e) =>
+                handleInputChange("isFeatured", e.target.checked)
+              }
             />
             <span className="font-medium">Featured Event</span>
           </label>
@@ -449,11 +452,11 @@ function EditEventForm({
           <Button
             variant="outline"
             className="bg-red-600 text-white py-6 rounded-lg w-full mt-2"
-          >Delete</Button>
+          >
+            Delete
+          </Button>
         </AlertDialogTrigger>
-        <AlertDialogContent
-          className="bg-white"
-        >
+        <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle>
               Delete {formData.eventCode}! <br />
@@ -468,7 +471,9 @@ function EditEventForm({
             <AlertDialogAction
               className="bg-red-600 text-white hover:text-black"
               onClick={handleEventDeletion}
-            >Delete</AlertDialogAction>
+            >
+              Delete
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

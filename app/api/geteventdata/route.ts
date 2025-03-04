@@ -52,8 +52,6 @@ export async function GET(req: NextRequest) {
       search ? sql`${events.code} ILIKE ${`%${search}%`}` : undefined,
     ].filter(Boolean); // Filter out undefined values directly in the array
 
-    console.log(conditions);
-
     try {
       // Check if data is in the cache
       // const cachedData = await redisClient.get(cacheKey);
@@ -71,6 +69,7 @@ export async function GET(req: NextRequest) {
             id: events.id,
             eventCode: events.code,
             saleEnd: events.saleEnd,
+            saleStart: events.saleStart,
             conditions: events.conditions,
             handicapTeamA: events.handicapTeamA,
             handicapTeamB: events.handicapTeamB,
