@@ -7,7 +7,6 @@ import {
   timestamp,
   boolean,
   bigint,
-  numeric,
   uniqueIndex,
   pgEnum,
 } from "drizzle-orm/pg-core";
@@ -16,6 +15,7 @@ export const networkEnum = pgEnum("network", [
   "taiko",
   "telos",
   "mantle",
+  "kaspaTestnet",
   "abstractTestnet",
 ]);
 
