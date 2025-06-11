@@ -92,7 +92,7 @@ export default function EventCreate() {
   //   }
   // };
 
-  useEffect(() => {}, [chainsTokens, category]);
+  useEffect(() => { }, [chainsTokens, category]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -406,7 +406,7 @@ export default function EventCreate() {
           <label className="block mb-4 font-medium">
             Team A
             <Dropdown
-              apiEndpoint={`/api/getallimages?categoryId=${Number(category)}`}
+              apiEndpoint={`/api/getallimages?categoryId=${category}&tournamentId=${tournament}`}
               value={selectedTeamAItem}
               placeholder="Search and select an image"
               extraPropKey="url"
@@ -450,7 +450,7 @@ export default function EventCreate() {
           <label className="block mb-4 font-medium">
             Team B
             <Dropdown
-              apiEndpoint={`/api/getallimages?categoryId=${Number(category)}`}
+              apiEndpoint={`/api/getallimages?categoryId=${category}&tournamentId=${tournament}`}
               value={selectedTeamBItem}
               placeholder="Search and select an image"
               extraPropKey="url"
@@ -492,11 +492,10 @@ export default function EventCreate() {
 
         <button
           type="submit"
-          className={`mt-4 py-2 px-4 rounded-lg w-full ${
-            isLoading
+          className={`mt-4 py-2 px-4 rounded-lg w-full ${isLoading
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-blue-600 text-white hover:bg-blue-500"
-          }`}
+            }`}
           disabled={isLoading}
         >
           Create Event
