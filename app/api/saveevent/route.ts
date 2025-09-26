@@ -7,7 +7,8 @@ const chainIdToNetwork = {
   167000: "taiko",
   5000: "mantle",
   167012: "kaspaTestnet",
-  11124:"abstractTestnet"
+  11124:"abstractTestnet",
+  202555:"kaspa"
 } as const;
 
 export async function POST(request: NextRequest) {

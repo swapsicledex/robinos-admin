@@ -17,6 +17,7 @@ export const networkEnum = pgEnum("network", [
   "mantle",
   "kaspaTestnet",
   "abstractTestnet",
+  "kaspa"
 ]);
 
 // Category Table
